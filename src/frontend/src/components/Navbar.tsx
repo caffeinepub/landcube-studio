@@ -88,7 +88,7 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
               className="gap-2 text-muted-foreground hover:text-foreground"
             >
               <Settings className="h-4 w-4" />
-              {currentView === "admin" ? "View Site" : "Admin"}
+              {currentView === "admin" ? "Portfolio" : "Admin"}
             </Button>
           )}
           <Button
@@ -118,9 +118,10 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
                 onNavigate(currentView === "admin" ? "home" : "admin");
                 setMobileOpen(false);
               }}
-              className="gap-1 text-muted-foreground hover:text-foreground px-2"
+              className="gap-1 text-muted-foreground hover:text-foreground px-2 text-xs font-medium tracking-wide uppercase"
             >
               <Settings className="h-4 w-4" />
+              {currentView === "admin" ? "Portfolio" : "Admin"}
             </Button>
           )}
           <Button

@@ -29,7 +29,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  Eye,
   Loader2,
   Lock,
   Mail,
@@ -47,7 +46,6 @@ import ProjectForm from "../components/ProjectForm";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
   useAllProjects,
-  useClaimAdmin,
   useContactMessages,
   useDeleteProject,
   useIsAdmin,
@@ -61,13 +59,16 @@ interface AdminPageProps {
 type SheetMode = "create" | "edit" | "about" | null;
 
 export default function AdminPage({ onBack }: AdminPageProps) {
-  const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
+  const {
+    data: isAdmin,
+    isLoading: adminLoading,
+    isError: adminError,
+  } = useIsAdmin();
   const { data: projects, isLoading: projectsLoading } = useAllProjects();
   const { data: messages, isLoading: messagesLoading } = useContactMessages();
   const deleteProject = useDeleteProject();
   const { identity } = useInternetIdentity();
   const queryClient = useQueryClient();
-  const claimAdmin = useClaimAdmin();
   const resetAndClaimAdmin = useResetAndClaimAdmin();
 
   const [activeTab, setActiveTab] = useState("projects");
@@ -107,21 +108,11 @@ export default function AdminPage({ onBack }: AdminPageProps) {
 
   const handleClaimAdmin = async () => {
     try {
-      await claimAdmin.mutateAsync();
-      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
-      toast.success("Admin access claimed successfully!");
-    } catch {
-      toast.error("Could not claim admin. Try 'Force Claim Admin' below.");
-    }
-  };
-
-  const handleResetAndClaim = async () => {
-    try {
       await resetAndClaimAdmin.mutateAsync();
       queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
-      toast.success("Admin access claimed!");
+      toast.success("Admin access granted!");
     } catch {
-      toast.error("Failed to claim admin access. Please try again.");
+      toast.error("Failed to claim admin. Please log out and try again.");
     }
   };
 
@@ -137,7 +128,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdmin || adminError) {
     const isAuthenticated = !!identity;
 
     return (
@@ -147,54 +138,31 @@ export default function AdminPage({ onBack }: AdminPageProps) {
       >
         <Lock className="h-12 w-12 text-muted-foreground" />
         <h2 className="font-display text-3xl">
-          {isAuthenticated ? "Admin Setup" : "Access Restricted"}
+          {isAuthenticated ? "Claim Admin Access" : "Access Restricted"}
         </h2>
         <p className="text-muted-foreground max-w-sm">
           {isAuthenticated
-            ? "You are logged in but don't have admin access yet. Claim admin rights below."
-            : "You must be logged in as an administrator to access this area."}
+            ? "Tap the button below to claim admin rights for this site."
+            : "You must be logged in to access this area."}
         </p>
 
         {isAuthenticated && (
-          <div className="flex flex-col items-center gap-3 w-full max-w-xs">
-            <Button
-              data-ocid="admin.primary_button"
-              onClick={handleClaimAdmin}
-              disabled={claimAdmin.isPending || resetAndClaimAdmin.isPending}
-              className="w-full gap-2"
-            >
-              {claimAdmin.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Claiming...
-                </>
-              ) : (
-                "Claim Admin Access"
-              )}
-            </Button>
-
-            <Button
-              data-ocid="admin.secondary_button"
-              variant="outline"
-              onClick={handleResetAndClaim}
-              disabled={resetAndClaimAdmin.isPending || claimAdmin.isPending}
-              className="w-full gap-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700"
-            >
-              {resetAndClaimAdmin.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Claiming...
-                </>
-              ) : (
-                <span>
-                  Force Claim Admin{" "}
-                  <span className="text-xs font-normal opacity-70">
-                    (use if claim fails)
-                  </span>
-                </span>
-              )}
-            </Button>
-          </div>
+          <Button
+            data-ocid="admin.primary_button"
+            size="lg"
+            onClick={handleClaimAdmin}
+            disabled={resetAndClaimAdmin.isPending}
+            className="w-full max-w-xs gap-2 text-sm tracking-wide"
+          >
+            {resetAndClaimAdmin.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Claiming...
+              </>
+            ) : (
+              "Claim Admin Access"
+            )}
+          </Button>
         )}
 
         <Button
@@ -225,15 +193,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             <h1 className="font-display text-4xl font-light">Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              data-ocid="admin.view_site_button"
-              variant="ghost"
-              size="sm"
-              onClick={onBack}
-              className="gap-2 text-xs tracking-wide uppercase"
-            >
-              <Eye className="h-4 w-4" /> View Site
-            </Button>
             <Button
               data-ocid="admin.secondary_button"
               variant="outline"

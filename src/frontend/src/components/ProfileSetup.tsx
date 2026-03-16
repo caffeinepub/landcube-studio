@@ -11,11 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  useClaimAdmin,
-  useSaveProfile,
-  useSelfRegister,
-} from "../hooks/useQueries";
+import { useActor } from "../hooks/useActor";
+import { useResetAndClaimAdmin, useSaveProfile } from "../hooks/useQueries";
 
 interface ProfileSetupProps {
   onComplete?: () => void;
@@ -25,10 +22,10 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const [name, setName] = useState("");
   const [open, setOpen] = useState(true);
   const saveProfile = useSaveProfile();
-  const selfRegister = useSelfRegister();
-  const claimAdmin = useClaimAdmin();
+  const resetAndClaimAdmin = useResetAndClaimAdmin();
+  const { actor } = useActor();
 
-  const isPending = saveProfile.isPending || selfRegister.isPending;
+  const isPending = saveProfile.isPending || resetAndClaimAdmin.isPending;
 
   const handleClose = () => {
     setOpen(false);
@@ -39,23 +36,22 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
     e.preventDefault();
     if (!name.trim()) return;
     try {
-      // selfRegister may fail if already registered — that's ok, continue anyway
-      try {
-        await selfRegister.mutateAsync();
-      } catch {
-        // Already registered, proceed to save profile
+      // First register the user so they can save a profile
+      if (actor) {
+        try {
+          await actor.selfRegister();
+        } catch {
+          // Already registered
+        }
       }
       await saveProfile.mutateAsync(name.trim());
-      // Try to claim admin silently — succeeds only if no admin exists yet
-      try {
-        await claimAdmin.mutateAsync();
-      } catch {
-        // Ignore — admin already exists
-      }
-      toast.success("Profile saved");
+      // Always use resetAndClaimAdmin so this user becomes admin
+      // regardless of any existing state
+      await resetAndClaimAdmin.mutateAsync();
+      toast.success("Admin access granted!");
       handleClose();
     } catch {
-      toast.error("Failed to save profile. Please try again.");
+      toast.error("Setup failed. Please try again.");
     }
   };
 
@@ -68,9 +64,11 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
     >
       <DialogContent data-ocid="profile.dialog" className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">Welcome</DialogTitle>
+          <DialogTitle className="font-display text-xl">
+            Admin Setup
+          </DialogTitle>
           <DialogDescription>
-            Please enter your name to set up your profile.
+            Enter your name to set up your admin profile.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
@@ -81,7 +79,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
               data-ocid="profile.input"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Maria Santos"
+              placeholder="e.g. Your Name"
               autoFocus
             />
           </div>
@@ -97,7 +95,7 @@ export default function ProfileSetup({ onComplete }: ProfileSetupProps) {
                 Setting up...
               </>
             ) : (
-              "Continue"
+              "Set Up Admin Access"
             )}
           </Button>
         </form>
