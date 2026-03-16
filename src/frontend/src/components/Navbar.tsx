@@ -1,21 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
-import { HelpCircle, Menu, Settings, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, Settings, X } from "lucide-react";
+import { useRef, useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useAboutContent, useIsAdmin } from "../hooks/useQueries";
 
 interface NavbarProps {
   currentView: "home" | "admin";
   onNavigate: (view: "home" | "admin") => void;
-  onShowAdminGuide: () => void;
 }
 
-export default function Navbar({
-  currentView,
-  onNavigate,
-  onShowAdminGuide,
-}: NavbarProps) {
+export default function Navbar({ currentView, onNavigate }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { login, clear, loginStatus, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
@@ -23,12 +18,35 @@ export default function Navbar({
   const { data: isAdmin } = useIsAdmin();
   const { data: about } = useAboutContent();
 
+  // Secret login: click logo 5 times quickly to reveal login button
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [secretLoginVisible, setSecretLoginVisible] = useState(false);
+
+  const handleLogoClick = () => {
+    onNavigate("home");
+    setMobileOpen(false);
+
+    clickCountRef.current += 1;
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+
+    if (clickCountRef.current >= 5) {
+      clickCountRef.current = 0;
+      setSecretLoginVisible(true);
+    } else {
+      clickTimerRef.current = setTimeout(() => {
+        clickCountRef.current = 0;
+      }, 1500);
+    }
+  };
+
   const architectName = about?.name || "Landcube Studio";
 
   const handleAuth = async () => {
     if (isAuthenticated) {
       await clear();
       queryClient.clear();
+      setSecretLoginVisible(false);
     } else {
       try {
         await login();
@@ -40,6 +58,9 @@ export default function Navbar({
       }
     }
   };
+
+  // Login button only visible to: the admin (to logout) or after secret gesture
+  const showLoginButton = isAdmin || secretLoginVisible;
 
   const navLinks = [
     { label: "Projects", href: "#projects" },
@@ -54,10 +75,7 @@ export default function Navbar({
         <button
           type="button"
           data-ocid="nav.link"
-          onClick={() => {
-            onNavigate("home");
-            setMobileOpen(false);
-          }}
+          onClick={handleLogoClick}
           className="font-display text-lg font-medium tracking-wide text-foreground hover:text-accent transition-colors"
         >
           {architectName}
@@ -80,19 +98,6 @@ export default function Navbar({
 
         {/* Actions */}
         <div className="hidden md:flex items-center gap-2">
-          {!isAdmin && (
-            <Button
-              data-ocid="nav.secondary_button"
-              variant="ghost"
-              size="sm"
-              onClick={onShowAdminGuide}
-              title="How to access admin dashboard"
-              className="gap-1.5 text-muted-foreground hover:text-foreground text-xs"
-            >
-              <HelpCircle className="h-4 w-4" />
-              Admin Access
-            </Button>
-          )}
           {isAdmin && (
             <Button
               data-ocid="nav.secondary_button"
@@ -107,20 +112,22 @@ export default function Navbar({
               {currentView === "admin" ? "View Site" : "Admin"}
             </Button>
           )}
-          <Button
-            data-ocid="nav.primary_button"
-            variant={isAuthenticated ? "outline" : "default"}
-            size="sm"
-            onClick={handleAuth}
-            disabled={loginStatus === "logging-in"}
-            className="text-xs tracking-widest uppercase font-medium"
-          >
-            {loginStatus === "logging-in"
-              ? "Logging in..."
-              : isAuthenticated
-                ? "Logout"
-                : "Login"}
-          </Button>
+          {showLoginButton && (
+            <Button
+              data-ocid="nav.primary_button"
+              variant={isAuthenticated ? "outline" : "default"}
+              size="sm"
+              onClick={handleAuth}
+              disabled={loginStatus === "logging-in"}
+              className="text-xs tracking-widest uppercase font-medium"
+            >
+              {loginStatus === "logging-in"
+                ? "Logging in..."
+                : isAuthenticated
+                  ? "Logout"
+                  : "Login"}
+            </Button>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -153,20 +160,6 @@ export default function Navbar({
                 {link.label}
               </a>
             ))}
-          {!isAdmin && (
-            <button
-              type="button"
-              data-ocid="nav.secondary_button"
-              onClick={() => {
-                onShowAdminGuide();
-                setMobileOpen(false);
-              }}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground tracking-wide uppercase text-left flex items-center gap-2"
-            >
-              <HelpCircle className="h-4 w-4" />
-              Admin Access
-            </button>
-          )}
           {isAdmin && (
             <button
               type="button"
@@ -180,20 +173,22 @@ export default function Navbar({
               {currentView === "admin" ? "View Site" : "Admin"}
             </button>
           )}
-          <Button
-            data-ocid="nav.primary_button"
-            variant={isAuthenticated ? "outline" : "default"}
-            size="sm"
-            onClick={handleAuth}
-            disabled={loginStatus === "logging-in"}
-            className="w-fit text-xs tracking-widest uppercase font-medium"
-          >
-            {loginStatus === "logging-in"
-              ? "Logging in..."
-              : isAuthenticated
-                ? "Logout"
-                : "Login"}
-          </Button>
+          {showLoginButton && (
+            <Button
+              data-ocid="nav.primary_button"
+              variant={isAuthenticated ? "outline" : "default"}
+              size="sm"
+              onClick={handleAuth}
+              disabled={loginStatus === "logging-in"}
+              className="w-fit text-xs tracking-widest uppercase font-medium"
+            >
+              {loginStatus === "logging-in"
+                ? "Logging in..."
+                : isAuthenticated
+                  ? "Logout"
+                  : "Login"}
+            </Button>
+          )}
         </div>
       )}
     </header>

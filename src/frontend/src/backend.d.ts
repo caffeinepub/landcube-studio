@@ -13,6 +13,13 @@ export interface AboutContent {
     name: string;
     contactEmail: string;
 }
+export interface ContactMessage {
+    id: bigint;
+    name: string;
+    createdAt: bigint;
+    email: string;
+    message: string;
+}
 export interface Project {
     id: bigint;
     title: string;
@@ -24,13 +31,6 @@ export interface Project {
     category: string;
     location: string;
 }
-export interface ContactMessage {
-    id: bigint;
-    name: string;
-    email: string;
-    message: string;
-    createdAt: bigint;
-}
 export interface UserProfile {
     name: string;
 }
@@ -41,6 +41,7 @@ export enum UserRole {
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    claimAdminIfNoneExists(): Promise<UserRole>;
     createProject(title: string, description: string, category: string, year: bigint, location: string, imageIds: Array<string>, featured: boolean): Promise<bigint>;
     deleteProject(id: bigint): Promise<void>;
     getAboutContent(): Promise<AboutContent>;
@@ -55,7 +56,9 @@ export interface backendInterface {
     init(): Promise<void>;
     isCallerAdmin(): Promise<boolean>;
     reorderProjects(newOrder: Array<bigint>): Promise<void>;
+    resetAndClaimAdmin(): Promise<UserRole>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    selfRegister(): Promise<UserRole>;
     submitContactMessage(name: string, email: string, message: string): Promise<bigint>;
     updateAboutContent(newContent: AboutContent): Promise<void>;
     updateProject(id: bigint, title: string, description: string, category: string, year: bigint, location: string, imageIds: Array<string>, featured: boolean): Promise<void>;

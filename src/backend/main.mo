@@ -13,6 +13,7 @@ import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
 
+
 actor {
   type Project = {
     id : Nat;
@@ -30,6 +31,13 @@ actor {
     public func compare(p1 : Project, p2 : Project) : Order.Order {
       Nat.compare(p1.id, p2.id);
     };
+  };
+
+  type ProjectCategory = {
+    #residential;
+    #commercial;
+    #publicProject;
+    #institutional;
   };
 
   type AboutContent = {
@@ -64,12 +72,20 @@ actor {
   let userProfiles = Map.empty<Principal, UserProfile>();
   let contactMessages = Map.empty<Nat, ContactMessage>();
   var nextMessageId = 1;
+  var initialized = false;
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
   include MixinStorage();
 
   public shared ({ caller }) func init() : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can initialize");
+    };
+    if (initialized) {
+      Runtime.trap("Already initialized");
+    };
+
     let sampleProjects = [
       {
         id = nextProjectId;
@@ -118,6 +134,8 @@ actor {
       tagline = "Designing the Future";
       contactEmail = "info@bauhaus.com";
     };
+
+    initialized := true;
   };
 
   func adminExists() : Bool {
@@ -146,12 +164,12 @@ actor {
       case (null) {
         let role : AccessControl.UserRole = if (not adminExists()) {
           accessControlState.adminAssigned := true;
-          #admin
+          #admin;
         } else {
-          #user
+          #user;
         };
         accessControlState.userRoles.add(caller, role);
-        role
+        role;
       };
     };
   };
@@ -173,13 +191,31 @@ actor {
         accessControlState.adminAssigned := true;
       };
     };
-    #admin
+    #admin;
   };
 
-  // Returns null if user is not registered or has no profile (no trap)
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+  public shared ({ caller }) func resetAndClaimAdmin() : async AccessControl.UserRole {
     if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous callers cannot access profiles");
+      Runtime.trap("Anonymous callers cannot claim admin");
+    };
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can reset admin");
+    };
+    let adminPrincipals = List.empty<Principal>();
+    for ((p, role) in accessControlState.userRoles.entries()) {
+      if (role == #admin) { adminPrincipals.add(p) };
+    };
+    for (p in adminPrincipals.values()) {
+      accessControlState.userRoles.add(p, #user);
+    };
+    accessControlState.userRoles.add(caller, #admin);
+    accessControlState.adminAssigned := true;
+    #admin;
+  };
+
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can access profiles");
     };
     userProfiles.get(caller);
   };
@@ -191,10 +227,9 @@ actor {
     userProfiles.get(user);
   };
 
-  // Auto-registers caller if needed, then saves profile
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous callers cannot save profiles");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can save profiles");
     };
     ensureRegistered(caller);
     userProfiles.add(caller, profile);

@@ -42,6 +42,13 @@ export const Project = IDL.Record({
   'location' : IDL.Text,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const ContactMessage = IDL.Record({
+  'id' : IDL.Nat,
+  'name' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'email' : IDL.Text,
+  'message' : IDL.Text,
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -72,6 +79,7 @@ export const idlService = IDL.Service({
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'claimAdminIfNoneExists' : IDL.Func([], [UserRole], []),
   'createProject' : IDL.Func(
       [
         IDL.Text,
@@ -90,6 +98,7 @@ export const idlService = IDL.Service({
   'getAllProjects' : IDL.Func([], [IDL.Vec(Project)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getContactMessages' : IDL.Func([], [IDL.Vec(ContactMessage)], ['query']),
   'getFeaturedProjects' : IDL.Func([], [IDL.Vec(Project)], ['query']),
   'getProjectById' : IDL.Func([IDL.Nat], [Project], ['query']),
   'getProjectsByCategory' : IDL.Func([IDL.Text], [IDL.Vec(Project)], ['query']),
@@ -101,7 +110,14 @@ export const idlService = IDL.Service({
   'init' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'reorderProjects' : IDL.Func([IDL.Vec(IDL.Nat)], [], []),
+  'resetAndClaimAdmin' : IDL.Func([], [UserRole], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'selfRegister' : IDL.Func([], [UserRole], []),
+  'submitContactMessage' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Nat],
+      [],
+    ),
   'updateAboutContent' : IDL.Func([AboutContent], [], []),
   'updateProject' : IDL.Func(
       [
@@ -156,6 +172,13 @@ export const idlFactory = ({ IDL }) => {
     'location' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const ContactMessage = IDL.Record({
+    'id' : IDL.Nat,
+    'name' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'email' : IDL.Text,
+    'message' : IDL.Text,
+  });
   
   return IDL.Service({
     '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -186,6 +209,7 @@ export const idlFactory = ({ IDL }) => {
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'claimAdminIfNoneExists' : IDL.Func([], [UserRole], []),
     'createProject' : IDL.Func(
         [
           IDL.Text,
@@ -204,6 +228,7 @@ export const idlFactory = ({ IDL }) => {
     'getAllProjects' : IDL.Func([], [IDL.Vec(Project)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getContactMessages' : IDL.Func([], [IDL.Vec(ContactMessage)], ['query']),
     'getFeaturedProjects' : IDL.Func([], [IDL.Vec(Project)], ['query']),
     'getProjectById' : IDL.Func([IDL.Nat], [Project], ['query']),
     'getProjectsByCategory' : IDL.Func(
@@ -219,7 +244,14 @@ export const idlFactory = ({ IDL }) => {
     'init' : IDL.Func([], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'reorderProjects' : IDL.Func([IDL.Vec(IDL.Nat)], [], []),
+    'resetAndClaimAdmin' : IDL.Func([], [UserRole], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'selfRegister' : IDL.Func([], [UserRole], []),
+    'submitContactMessage' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
     'updateAboutContent' : IDL.Func([AboutContent], [], []),
     'updateProject' : IDL.Func(
         [

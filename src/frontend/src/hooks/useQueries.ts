@@ -1,14 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { AboutContent, Project } from "../backend";
+import type { AboutContent, ContactMessage, Project } from "../backend";
 import { useActor } from "./useActor";
 
-export interface ContactMessage {
-  id: bigint;
-  name: string;
-  email: string;
-  message: string;
-  createdAt: bigint;
-}
+export type { ContactMessage };
 
 export function useAllProjects() {
   const { actor, isFetching } = useActor();
@@ -95,7 +89,7 @@ export function useContactMessages() {
     queryKey: ["contactMessages"],
     queryFn: async () => {
       if (!actor) return [];
-      return (actor as any).getContactMessages();
+      return actor.getContactMessages();
     },
     enabled: !!actor && !isFetching,
   });
@@ -110,11 +104,7 @@ export function useSubmitContactMessage() {
       message: string;
     }) => {
       if (!actor) throw new Error("Not available");
-      return (actor as any).submitContactMessage(
-        data.name,
-        data.email,
-        data.message,
-      ) as Promise<bigint>;
+      return actor.submitContactMessage(data.name, data.email, data.message);
     },
   });
 }
@@ -229,7 +219,7 @@ export function useSelfRegister() {
   return useMutation({
     mutationFn: async () => {
       if (!actor) throw new Error("Not authenticated");
-      return (actor as any).selfRegister();
+      return actor.selfRegister();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
@@ -244,7 +234,22 @@ export function useClaimAdmin() {
   return useMutation({
     mutationFn: async () => {
       if (!actor) throw new Error("Not authenticated");
-      return (actor as any).claimAdminIfNoneExists();
+      return actor.claimAdminIfNoneExists();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+    },
+  });
+}
+
+export function useResetAndClaimAdmin() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("Not authenticated");
+      return actor.resetAndClaimAdmin();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["isAdmin"] });

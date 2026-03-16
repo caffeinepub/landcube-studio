@@ -16,6 +16,13 @@ export interface AboutContent {
   'name' : string,
   'contactEmail' : string,
 }
+export interface ContactMessage {
+  'id' : bigint,
+  'name' : string,
+  'createdAt' : bigint,
+  'email' : string,
+  'message' : string,
+}
 export interface Project {
   'id' : bigint,
   'title' : string,
@@ -60,6 +67,7 @@ export interface _SERVICE {
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'claimAdminIfNoneExists' : ActorMethod<[], UserRole>,
   'createProject' : ActorMethod<
     [string, string, string, bigint, string, Array<string>, boolean],
     bigint
@@ -69,6 +77,7 @@ export interface _SERVICE {
   'getAllProjects' : ActorMethod<[], Array<Project>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getContactMessages' : ActorMethod<[], Array<ContactMessage>>,
   'getFeaturedProjects' : ActorMethod<[], Array<Project>>,
   'getProjectById' : ActorMethod<[bigint], Project>,
   'getProjectsByCategory' : ActorMethod<[string], Array<Project>>,
@@ -76,7 +85,10 @@ export interface _SERVICE {
   'init' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'reorderProjects' : ActorMethod<[Array<bigint>], undefined>,
+  'resetAndClaimAdmin' : ActorMethod<[], UserRole>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'selfRegister' : ActorMethod<[], UserRole>,
+  'submitContactMessage' : ActorMethod<[string, string, string], bigint>,
   'updateAboutContent' : ActorMethod<[AboutContent], undefined>,
   'updateProject' : ActorMethod<
     [bigint, string, string, string, bigint, string, Array<string>, boolean],
