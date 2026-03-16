@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Settings, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import { useAboutContent, useIsAdmin } from "../hooks/useQueries";
+import { useAboutContent } from "../hooks/useQueries";
 
 interface NavbarProps {
   currentView: "home" | "admin";
@@ -14,13 +14,28 @@ interface NavbarProps {
 
 export default function Navbar({ currentView, onNavigate }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const { login, clear, loginStatus, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
   const isAuthenticated = !!identity;
-  const { data: isAdmin } = useIsAdmin();
   const { data: about } = useAboutContent();
 
   const architectName = about?.name || "Landcube Studio";
+
+  useEffect(() => {
+    // Check if ?admin is in the URL and persist to localStorage
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("admin")) {
+      localStorage.setItem("adminAccess", "true");
+      // Clean URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("admin");
+      window.history.replaceState({}, "", url.toString());
+    }
+    if (localStorage.getItem("adminAccess") === "true" || isAuthenticated) {
+      setShowLogin(true);
+    }
+  }, [isAuthenticated]);
 
   const handleAuth = async () => {
     if (isAuthenticated) {
@@ -78,7 +93,7 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-2">
-          {isAdmin && (
+          {isAuthenticated && (
             <Button
               data-ocid="nav.secondary_button"
               variant="ghost"
@@ -92,25 +107,27 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
               {currentView === "admin" ? "View Site" : "Admin"}
             </Button>
           )}
-          <Button
-            data-ocid="nav.primary_button"
-            variant={isAuthenticated ? "outline" : "default"}
-            size="sm"
-            onClick={handleAuth}
-            disabled={loginStatus === "logging-in"}
-            className="text-xs tracking-widest uppercase font-medium"
-          >
-            {loginStatus === "logging-in"
-              ? "Logging in..."
-              : isAuthenticated
-                ? "Logout"
-                : "Login"}
-          </Button>
+          {showLogin && (
+            <Button
+              data-ocid="nav.primary_button"
+              variant={isAuthenticated ? "outline" : "default"}
+              size="sm"
+              onClick={handleAuth}
+              disabled={loginStatus === "logging-in"}
+              className="text-xs tracking-widest uppercase font-medium"
+            >
+              {loginStatus === "logging-in"
+                ? "Logging in..."
+                : isAuthenticated
+                  ? "Logout"
+                  : "Login"}
+            </Button>
+          )}
         </div>
 
-        {/* Mobile: Login button always visible + hamburger */}
+        {/* Mobile: conditional login button + hamburger */}
         <div className="md:hidden flex items-center gap-2">
-          {isAdmin && (
+          {isAuthenticated && (
             <Button
               data-ocid="nav.secondary_button"
               variant="ghost"
@@ -124,20 +141,22 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
               <Settings className="h-4 w-4" />
             </Button>
           )}
-          <Button
-            data-ocid="nav.primary_button"
-            variant={isAuthenticated ? "outline" : "default"}
-            size="sm"
-            onClick={handleAuth}
-            disabled={loginStatus === "logging-in"}
-            className="text-xs tracking-widest uppercase font-medium"
-          >
-            {loginStatus === "logging-in"
-              ? "..."
-              : isAuthenticated
-                ? "Logout"
-                : "Login"}
-          </Button>
+          {showLogin && (
+            <Button
+              data-ocid="nav.primary_button"
+              variant={isAuthenticated ? "outline" : "default"}
+              size="sm"
+              onClick={handleAuth}
+              disabled={loginStatus === "logging-in"}
+              className="text-xs tracking-widest uppercase font-medium"
+            >
+              {loginStatus === "logging-in"
+                ? "..."
+                : isAuthenticated
+                  ? "Logout"
+                  : "Login"}
+            </Button>
+          )}
           <button
             type="button"
             className="p-2 text-foreground"

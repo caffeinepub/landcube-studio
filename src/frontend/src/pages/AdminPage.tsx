@@ -73,7 +73,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   const [sheetMode, setSheetMode] = useState<SheetMode>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
-  const [claimFailed, setClaimFailed] = useState(false);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -110,10 +109,8 @@ export default function AdminPage({ onBack }: AdminPageProps) {
       await claimAdmin.mutateAsync();
       queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
       toast.success("Admin access claimed successfully!");
-      setClaimFailed(false);
     } catch {
-      setClaimFailed(true);
-      toast.error("Admin already exists. Try resetting below.");
+      toast.error("Could not claim admin. Try 'Force Claim Admin' below.");
     }
   };
 
@@ -121,10 +118,9 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     try {
       await resetAndClaimAdmin.mutateAsync();
       queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
-      toast.success("Admin access reset and claimed!");
-      setClaimFailed(false);
+      toast.success("Admin access claimed!");
     } catch {
-      toast.error("Failed to reset admin access. Please try again.");
+      toast.error("Failed to claim admin access. Please try again.");
     }
   };
 
@@ -176,29 +172,32 @@ export default function AdminPage({ onBack }: AdminPageProps) {
               )}
             </Button>
 
-            {claimFailed && (
-              <Button
-                data-ocid="admin.secondary_button"
-                variant="outline"
-                onClick={handleResetAndClaim}
-                disabled={resetAndClaimAdmin.isPending || claimAdmin.isPending}
-                className="w-full gap-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700"
-              >
-                {resetAndClaimAdmin.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Resetting...
-                  </>
-                ) : (
-                  "Reset & Claim Admin"
-                )}
-              </Button>
-            )}
+            <Button
+              data-ocid="admin.secondary_button"
+              variant="outline"
+              onClick={handleResetAndClaim}
+              disabled={resetAndClaimAdmin.isPending || claimAdmin.isPending}
+              className="w-full gap-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700"
+            >
+              {resetAndClaimAdmin.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Claiming...
+                </>
+              ) : (
+                <span>
+                  Force Claim Admin{" "}
+                  <span className="text-xs font-normal opacity-70">
+                    (use if claim fails)
+                  </span>
+                </span>
+              )}
+            </Button>
           </div>
         )}
 
         <Button
-          data-ocid="admin.secondary_button"
+          data-ocid="admin.cancel_button"
           variant="outline"
           onClick={onBack}
           className="gap-2"

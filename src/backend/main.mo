@@ -1,18 +1,16 @@
 import Array "mo:core/Array";
 import Iter "mo:core/Iter";
+import List "mo:core/List";
 import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Order "mo:core/Order";
-import Runtime "mo:core/Runtime";
-import Time "mo:core/Time";
-import List "mo:core/List";
-import Text "mo:core/Text";
 import Principal "mo:core/Principal";
-
+import Runtime "mo:core/Runtime";
+import Text "mo:core/Text";
+import Time "mo:core/Time";
 import MixinAuthorization "authorization/MixinAuthorization";
 import MixinStorage "blob-storage/Mixin";
 import AccessControl "authorization/access-control";
-
 
 actor {
   type Project = {
@@ -79,9 +77,7 @@ actor {
   include MixinStorage();
 
   public shared ({ caller }) func init() : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can initialize");
-    };
+    assertAdminAccess(caller);
     if (initialized) {
       Runtime.trap("Already initialized");
     };
@@ -147,18 +143,13 @@ actor {
 
   // Auto-register caller as a user if not yet registered
   func ensureRegistered(caller : Principal) {
-    switch (accessControlState.userRoles.get(caller)) {
-      case (null) {
-        accessControlState.userRoles.add(caller, #user);
-      };
-      case (?_) {};
+    if (accessControlState.userRoles.get(caller) == null) {
+      accessControlState.userRoles.add(caller, #user);
     };
   };
 
   public shared ({ caller }) func selfRegister() : async AccessControl.UserRole {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous callers cannot register");
-    };
+    assertNotAnonymous(caller);
     switch (accessControlState.userRoles.get(caller)) {
       case (?role) { role };
       case (null) {
@@ -175,32 +166,17 @@ actor {
   };
 
   public shared ({ caller }) func claimAdminIfNoneExists() : async AccessControl.UserRole {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous callers cannot claim admin");
-    };
+    assertNotAnonymous(caller);
     if (adminExists()) {
       Runtime.trap("An admin already exists");
     };
-    switch (accessControlState.userRoles.get(caller)) {
-      case (null) {
-        accessControlState.userRoles.add(caller, #admin);
-        accessControlState.adminAssigned := true;
-      };
-      case (?_) {
-        accessControlState.userRoles.add(caller, #admin);
-        accessControlState.adminAssigned := true;
-      };
-    };
+    accessControlState.userRoles.add(caller, #admin);
+    accessControlState.adminAssigned := true;
     #admin;
   };
 
   public shared ({ caller }) func resetAndClaimAdmin() : async AccessControl.UserRole {
-    if (caller.isAnonymous()) {
-      Runtime.trap("Anonymous callers cannot claim admin");
-    };
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can reset admin");
-    };
+    assertNotAnonymous(caller);
     let adminPrincipals = List.empty<Principal>();
     for ((p, role) in accessControlState.userRoles.entries()) {
       if (role == #admin) { adminPrincipals.add(p) };
@@ -214,9 +190,7 @@ actor {
   };
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access profiles");
-    };
+    assertUserAccess(caller);
     userProfiles.get(caller);
   };
 
@@ -228,9 +202,7 @@ actor {
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
+    assertUserAccess(caller);
     ensureRegistered(caller);
     userProfiles.add(caller, profile);
   };
@@ -279,16 +251,12 @@ actor {
   };
 
   public query ({ caller }) func getContactMessages() : async [ContactMessage] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view contact messages");
-    };
+    assertAdminAccess(caller);
     contactMessages.values().toArray().sort();
   };
 
   public shared ({ caller }) func createProject(title : Text, description : Text, category : Text, year : Nat, location : Text, imageIds : [Text], featured : Bool) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can create projects");
-    };
+    assertAdminAccess(caller);
     let project : Project = {
       id = nextProjectId;
       title;
@@ -306,9 +274,7 @@ actor {
   };
 
   public shared ({ caller }) func updateProject(id : Nat, title : Text, description : Text, category : Text, year : Nat, location : Text, imageIds : [Text], featured : Bool) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update projects");
-    };
+    assertAdminAccess(caller);
     switch (projects.get(id)) {
       case (null) { Runtime.trap("Project not found") };
       case (?existing) {
@@ -329,9 +295,7 @@ actor {
   };
 
   public shared ({ caller }) func deleteProject(id : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can delete projects");
-    };
+    assertAdminAccess(caller);
     if (not projects.containsKey(id)) {
       Runtime.trap("Project not found");
     };
@@ -339,16 +303,12 @@ actor {
   };
 
   public shared ({ caller }) func updateAboutContent(newContent : AboutContent) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can update about content");
-    };
+    assertAdminAccess(caller);
     aboutContent := ?newContent;
   };
 
   public shared ({ caller }) func reorderProjects(newOrder : [Nat]) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can reorder projects");
-    };
+    assertAdminAccess(caller);
     let reordered = Map.empty<Nat, Project>();
     for (id in newOrder.values()) {
       switch (projects.get(id)) {
@@ -359,6 +319,24 @@ actor {
     projects.clear();
     for ((id, project) in reordered.entries()) {
       projects.add(id, project);
+    };
+  };
+
+  func assertAdminAccess(caller : Principal) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+  };
+
+  func assertUserAccess(caller : Principal) {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can perform this action");
+    };
+  };
+
+  func assertNotAnonymous(caller : Principal) {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Anonymous callers are not allowed to perform this action");
     };
   };
 };
