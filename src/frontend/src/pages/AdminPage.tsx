@@ -29,6 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  Eye,
   Loader2,
   Lock,
   Mail,
@@ -224,6 +225,15 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             <h1 className="font-display text-4xl font-light">Dashboard</h1>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              data-ocid="admin.view_site_button"
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="gap-2 text-xs tracking-wide uppercase"
+            >
+              <Eye className="h-4 w-4" /> View Site
+            </Button>
             <Button
               data-ocid="admin.secondary_button"
               variant="outline"
