@@ -26,8 +26,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
+  Loader2,
   Lock,
   Mail,
   Pencil,
@@ -41,11 +43,14 @@ import { toast } from "sonner";
 import type { Project } from "../backend";
 import AboutForm from "../components/AboutForm";
 import ProjectForm from "../components/ProjectForm";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
   useAllProjects,
+  useClaimAdmin,
   useContactMessages,
   useDeleteProject,
   useIsAdmin,
+  useResetAndClaimAdmin,
 } from "../hooks/useQueries";
 
 interface AdminPageProps {
@@ -59,11 +64,16 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   const { data: projects, isLoading: projectsLoading } = useAllProjects();
   const { data: messages, isLoading: messagesLoading } = useContactMessages();
   const deleteProject = useDeleteProject();
+  const { identity } = useInternetIdentity();
+  const queryClient = useQueryClient();
+  const claimAdmin = useClaimAdmin();
+  const resetAndClaimAdmin = useResetAndClaimAdmin();
 
   const [activeTab, setActiveTab] = useState("projects");
   const [sheetMode, setSheetMode] = useState<SheetMode>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [claimFailed, setClaimFailed] = useState(false);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -95,6 +105,29 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     });
   };
 
+  const handleClaimAdmin = async () => {
+    try {
+      await claimAdmin.mutateAsync();
+      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+      toast.success("Admin access claimed successfully!");
+      setClaimFailed(false);
+    } catch {
+      setClaimFailed(true);
+      toast.error("Admin already exists. Try resetting below.");
+    }
+  };
+
+  const handleResetAndClaim = async () => {
+    try {
+      await resetAndClaimAdmin.mutateAsync();
+      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+      toast.success("Admin access reset and claimed!");
+      setClaimFailed(false);
+    } catch {
+      toast.error("Failed to reset admin access. Please try again.");
+    }
+  };
+
   if (adminLoading) {
     return (
       <div
@@ -108,16 +141,62 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   }
 
   if (!isAdmin) {
+    const isAuthenticated = !!identity;
+
     return (
       <div
         data-ocid="admin.error_state"
         className="pt-24 max-w-7xl mx-auto px-6 py-24 flex flex-col items-center text-center gap-6"
       >
         <Lock className="h-12 w-12 text-muted-foreground" />
-        <h2 className="font-display text-3xl">Access Restricted</h2>
+        <h2 className="font-display text-3xl">
+          {isAuthenticated ? "Admin Setup" : "Access Restricted"}
+        </h2>
         <p className="text-muted-foreground max-w-sm">
-          You must be logged in as an administrator to access this area.
+          {isAuthenticated
+            ? "You are logged in but don't have admin access yet. Claim admin rights below."
+            : "You must be logged in as an administrator to access this area."}
         </p>
+
+        {isAuthenticated && (
+          <div className="flex flex-col items-center gap-3 w-full max-w-xs">
+            <Button
+              data-ocid="admin.primary_button"
+              onClick={handleClaimAdmin}
+              disabled={claimAdmin.isPending || resetAndClaimAdmin.isPending}
+              className="w-full gap-2"
+            >
+              {claimAdmin.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Claiming...
+                </>
+              ) : (
+                "Claim Admin Access"
+              )}
+            </Button>
+
+            {claimFailed && (
+              <Button
+                data-ocid="admin.secondary_button"
+                variant="outline"
+                onClick={handleResetAndClaim}
+                disabled={resetAndClaimAdmin.isPending || claimAdmin.isPending}
+                className="w-full gap-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 hover:text-yellow-700"
+              >
+                {resetAndClaimAdmin.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Resetting...
+                  </>
+                ) : (
+                  "Reset & Claim Admin"
+                )}
+              </Button>
+            )}
+          </div>
+        )}
+
         <Button
           data-ocid="admin.secondary_button"
           variant="outline"

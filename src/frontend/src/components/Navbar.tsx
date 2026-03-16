@@ -1,16 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Settings, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useAboutContent, useIsAdmin } from "../hooks/useQueries";
 
 interface NavbarProps {
   currentView: "home" | "admin";
   onNavigate: (view: "home" | "admin") => void;
+  showAdminLogin: boolean;
+  onAdminLoginShown: () => void;
 }
 
-export default function Navbar({ currentView, onNavigate }: NavbarProps) {
+export default function Navbar({
+  currentView,
+  onNavigate,
+  showAdminLogin,
+}: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { login, clear, loginStatus, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
@@ -18,35 +24,13 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
   const { data: isAdmin } = useIsAdmin();
   const { data: about } = useAboutContent();
 
-  // Secret login: click logo 5 times quickly to reveal login button
-  const clickCountRef = useRef(0);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [secretLoginVisible, setSecretLoginVisible] = useState(false);
-
-  const handleLogoClick = () => {
-    onNavigate("home");
-    setMobileOpen(false);
-
-    clickCountRef.current += 1;
-    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
-
-    if (clickCountRef.current >= 5) {
-      clickCountRef.current = 0;
-      setSecretLoginVisible(true);
-    } else {
-      clickTimerRef.current = setTimeout(() => {
-        clickCountRef.current = 0;
-      }, 1500);
-    }
-  };
-
   const architectName = about?.name || "Landcube Studio";
 
   const handleAuth = async () => {
     if (isAuthenticated) {
       await clear();
       queryClient.clear();
-      setSecretLoginVisible(false);
+      sessionStorage.removeItem("adminAccess");
     } else {
       try {
         await login();
@@ -59,8 +43,8 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
     }
   };
 
-  // Login button only visible to: the admin (to logout) or after secret gesture
-  const showLoginButton = isAdmin || secretLoginVisible;
+  // Login button visible to: the admin (to logout) or when admin login revealed
+  const showLoginButton = isAdmin || showAdminLogin;
 
   const navLinks = [
     { label: "Projects", href: "#projects" },
@@ -75,8 +59,11 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
         <button
           type="button"
           data-ocid="nav.link"
-          onClick={handleLogoClick}
-          className="font-display text-lg font-medium tracking-wide text-foreground hover:text-accent transition-colors"
+          onClick={() => {
+            onNavigate("home");
+            setMobileOpen(false);
+          }}
+          className="font-display text-lg font-medium tracking-wide transition-colors text-foreground hover:text-accent"
         >
           {architectName}
         </button>

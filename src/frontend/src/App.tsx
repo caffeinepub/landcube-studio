@@ -34,7 +34,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar currentView={view} onNavigate={setView} />
+      <Navbar
+        currentView={view}
+        onNavigate={setView}
+        showAdminLogin={true}
+        onAdminLoginShown={() => {}}
+      />
       <main className="flex-1">
         {view === "home" ? (
           <HomePage />
