@@ -12,11 +12,7 @@ interface NavbarProps {
   onAdminLoginShown: () => void;
 }
 
-export default function Navbar({
-  currentView,
-  onNavigate,
-  showAdminLogin,
-}: NavbarProps) {
+export default function Navbar({ currentView, onNavigate }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { login, clear, loginStatus, identity } = useInternetIdentity();
   const queryClient = useQueryClient();
@@ -42,9 +38,6 @@ export default function Navbar({
       }
     }
   };
-
-  // Login button visible to: the admin (to logout) or when admin login revealed
-  const showLoginButton = isAdmin || showAdminLogin;
 
   const navLinks = [
     { label: "Projects", href: "#projects" },
@@ -83,7 +76,7 @@ export default function Navbar({
             ))}
         </nav>
 
-        {/* Actions */}
+        {/* Desktop Actions */}
         <div className="hidden md:flex items-center gap-2">
           {isAdmin && (
             <Button
@@ -99,37 +92,65 @@ export default function Navbar({
               {currentView === "admin" ? "View Site" : "Admin"}
             </Button>
           )}
-          {showLoginButton && (
-            <Button
-              data-ocid="nav.primary_button"
-              variant={isAuthenticated ? "outline" : "default"}
-              size="sm"
-              onClick={handleAuth}
-              disabled={loginStatus === "logging-in"}
-              className="text-xs tracking-widest uppercase font-medium"
-            >
-              {loginStatus === "logging-in"
-                ? "Logging in..."
-                : isAuthenticated
-                  ? "Logout"
-                  : "Login"}
-            </Button>
-          )}
+          <Button
+            data-ocid="nav.primary_button"
+            variant={isAuthenticated ? "outline" : "default"}
+            size="sm"
+            onClick={handleAuth}
+            disabled={loginStatus === "logging-in"}
+            className="text-xs tracking-widest uppercase font-medium"
+          >
+            {loginStatus === "logging-in"
+              ? "Logging in..."
+              : isAuthenticated
+                ? "Logout"
+                : "Login"}
+          </Button>
         </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          type="button"
-          className="md:hidden p-2 text-foreground"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
+        {/* Mobile: Login button always visible + hamburger */}
+        <div className="md:hidden flex items-center gap-2">
+          {isAdmin && (
+            <Button
+              data-ocid="nav.secondary_button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onNavigate(currentView === "admin" ? "home" : "admin");
+                setMobileOpen(false);
+              }}
+              className="gap-1 text-muted-foreground hover:text-foreground px-2"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
           )}
-        </button>
+          <Button
+            data-ocid="nav.primary_button"
+            variant={isAuthenticated ? "outline" : "default"}
+            size="sm"
+            onClick={handleAuth}
+            disabled={loginStatus === "logging-in"}
+            className="text-xs tracking-widest uppercase font-medium"
+          >
+            {loginStatus === "logging-in"
+              ? "..."
+              : isAuthenticated
+                ? "Logout"
+                : "Login"}
+          </Button>
+          <button
+            type="button"
+            className="p-2 text-foreground"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -147,35 +168,6 @@ export default function Navbar({
                 {link.label}
               </a>
             ))}
-          {isAdmin && (
-            <button
-              type="button"
-              data-ocid="nav.secondary_button"
-              onClick={() => {
-                onNavigate(currentView === "admin" ? "home" : "admin");
-                setMobileOpen(false);
-              }}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground tracking-wide uppercase text-left"
-            >
-              {currentView === "admin" ? "View Site" : "Admin"}
-            </button>
-          )}
-          {showLoginButton && (
-            <Button
-              data-ocid="nav.primary_button"
-              variant={isAuthenticated ? "outline" : "default"}
-              size="sm"
-              onClick={handleAuth}
-              disabled={loginStatus === "logging-in"}
-              className="w-fit text-xs tracking-widest uppercase font-medium"
-            >
-              {loginStatus === "logging-in"
-                ? "Logging in..."
-                : isAuthenticated
-                  ? "Logout"
-                  : "Login"}
-            </Button>
-          )}
         </div>
       )}
     </header>
