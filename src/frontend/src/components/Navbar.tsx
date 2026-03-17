@@ -55,9 +55,16 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
             onNavigate("home");
             setMobileOpen(false);
           }}
-          className="font-display text-lg font-medium tracking-wide transition-colors text-foreground hover:text-accent"
+          className="flex items-center gap-3 transition-opacity hover:opacity-80"
         >
-          {architectName}
+          <img
+            src="/assets/uploads/IMG_4763-1.jpeg"
+            alt="Landcube Studio"
+            className="h-9 w-9 rounded-full object-cover"
+          />
+          <span className="font-display text-lg font-medium tracking-wide text-foreground">
+            {architectName}
+          </span>
         </button>
 
         {/* Desktop nav */}

@@ -43,13 +43,13 @@ import { toast } from "sonner";
 import type { Project } from "../backend";
 import AboutForm from "../components/AboutForm";
 import ProjectForm from "../components/ProjectForm";
+import { useActor } from "../hooks/useActor";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
   useAllProjects,
   useContactMessages,
   useDeleteProject,
   useIsAdmin,
-  useResetAndClaimAdmin,
 } from "../hooks/useQueries";
 
 interface AdminPageProps {
@@ -59,22 +59,20 @@ interface AdminPageProps {
 type SheetMode = "create" | "edit" | "about" | null;
 
 export default function AdminPage({ onBack }: AdminPageProps) {
-  const {
-    data: isAdmin,
-    isLoading: adminLoading,
-    isError: adminError,
-  } = useIsAdmin();
+  const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
   const { data: projects, isLoading: projectsLoading } = useAllProjects();
   const { data: messages, isLoading: messagesLoading } = useContactMessages();
   const deleteProject = useDeleteProject();
   const { identity } = useInternetIdentity();
+  const { actor, isFetching: actorFetching } = useActor();
   const queryClient = useQueryClient();
-  const resetAndClaimAdmin = useResetAndClaimAdmin();
 
   const [activeTab, setActiveTab] = useState("projects");
   const [sheetMode, setSheetMode] = useState<SheetMode>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [claiming, setClaiming] = useState(false);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -107,16 +105,35 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   };
 
   const handleClaimAdmin = async () => {
+    setClaimError(null);
+    if (!actor) {
+      setClaimError("Session not ready. Please log out and log back in.");
+      return;
+    }
+    setClaiming(true);
     try {
-      await resetAndClaimAdmin.mutateAsync();
-      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+      // Call resetAndClaimAdmin directly on the actor.
+      // This works even if _initializeAccessControlWithSecret failed,
+      // because resetAndClaimAdmin only needs assertNotAnonymous.
+      await actor.resetAndClaimAdmin();
+      await queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+      await queryClient.refetchQueries({ queryKey: ["isAdmin"] });
       toast.success("Admin access granted!");
-    } catch {
-      toast.error("Failed to claim admin. Please log out and try again.");
+    } catch (err: unknown) {
+      const raw = err instanceof Error ? err.message : String(err);
+      const msg = raw.includes("Reject text:")
+        ? (raw.split("Reject text:")[1]?.trim() ?? raw)
+        : raw;
+      setClaimError(`Error: ${msg}`);
+      toast.error("Admin claim failed.");
+    } finally {
+      setClaiming(false);
     }
   };
 
-  if (adminLoading) {
+  const isLoading = adminLoading || actorFetching;
+
+  if (isLoading) {
     return (
       <div
         data-ocid="admin.loading_state"
@@ -128,7 +145,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     );
   }
 
-  if (!isAdmin || adminError) {
+  if (!isAdmin) {
     const isAuthenticated = !!identity;
 
     return (
@@ -137,9 +154,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
         className="pt-24 max-w-7xl mx-auto px-6 py-24 flex flex-col items-center text-center gap-6"
       >
         <Lock className="h-12 w-12 text-muted-foreground" />
-        <h2 className="font-display text-3xl">
-          {isAuthenticated ? "Claim Admin Access" : "Access Restricted"}
-        </h2>
+        <h2 className="font-display text-3xl">Admin Access</h2>
         <p className="text-muted-foreground max-w-sm">
           {isAuthenticated
             ? "Tap the button below to claim admin rights for this site."
@@ -151,10 +166,10 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             data-ocid="admin.primary_button"
             size="lg"
             onClick={handleClaimAdmin}
-            disabled={resetAndClaimAdmin.isPending}
-            className="w-full max-w-xs gap-2 text-sm tracking-wide"
+            disabled={claiming}
+            className="w-full max-w-sm gap-2 text-sm tracking-wide py-6"
           >
-            {resetAndClaimAdmin.isPending ? (
+            {claiming ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Claiming...
@@ -163,6 +178,15 @@ export default function AdminPage({ onBack }: AdminPageProps) {
               "Claim Admin Access"
             )}
           </Button>
+        )}
+
+        {claimError && (
+          <div
+            data-ocid="admin.error_state"
+            className="text-sm text-destructive w-full max-w-sm bg-destructive/10 rounded p-3 text-left break-words"
+          >
+            {claimError}
+          </div>
         )}
 
         <Button
@@ -180,7 +204,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   return (
     <div className="pt-24 min-h-screen">
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -213,7 +236,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
           </div>
         </motion.div>
 
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-secondary mb-8 rounded-none h-auto p-0 gap-0 border border-border">
             <TabsTrigger
@@ -237,7 +259,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             </TabsTrigger>
           </TabsList>
 
-          {/* Projects Tab */}
           <TabsContent value="projects">
             {projectsLoading ? (
               <div data-ocid="admin.loading_state" className="space-y-3">
@@ -347,7 +368,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
             )}
           </TabsContent>
 
-          {/* Messages Tab */}
           <TabsContent value="messages">
             {messagesLoading ? (
               <div data-ocid="admin.loading_state" className="space-y-3">
@@ -430,7 +450,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
         </Tabs>
       </div>
 
-      {/* Project Form Sheet */}
       <Sheet
         open={sheetMode === "create" || sheetMode === "edit"}
         onOpenChange={(open) => !open && closeSheet()}
@@ -453,7 +472,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
         </SheetContent>
       </Sheet>
 
-      {/* About Form Sheet */}
       <Sheet
         open={sheetMode === "about"}
         onOpenChange={(open) => !open && closeSheet()}
@@ -472,7 +490,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
         </SheetContent>
       </Sheet>
 
-      {/* Delete Confirm */}
       <AlertDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}

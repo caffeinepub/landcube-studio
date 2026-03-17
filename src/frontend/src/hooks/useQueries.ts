@@ -4,6 +4,13 @@ import { useActor } from "./useActor";
 
 export type { ContactMessage };
 
+const DEFAULT_ABOUT: AboutContent = {
+  name: "Landcube Studio",
+  tagline: "Design and visualization services",
+  bio: "LANDCUBE Design Studio is a creative and innovative architectural firm dedicated to transforming spaces with excellence and precision. With over 5 years of experience, we deliver sustainable, high-quality designs across residential, commercial, and public projects, crafting spaces that inspire and enhance human experience.",
+  contactEmail: "landcube0@gmail.com",
+};
+
 export function useAllProjects() {
   const { actor, isFetching } = useActor();
   return useQuery<Project[]>({
@@ -46,10 +53,22 @@ export function useAboutContent() {
   return useQuery<AboutContent>({
     queryKey: ["about"],
     queryFn: async () => {
-      if (!actor) throw new Error("No actor");
-      return actor.getAboutContent();
+      if (!actor) return DEFAULT_ABOUT;
+      try {
+        const result = await actor.getAboutContent();
+        // If the canister returned empty fields, use defaults
+        return {
+          name: result.name || DEFAULT_ABOUT.name,
+          tagline: result.tagline || DEFAULT_ABOUT.tagline,
+          bio: result.bio || DEFAULT_ABOUT.bio,
+          contactEmail: result.contactEmail || DEFAULT_ABOUT.contactEmail,
+        };
+      } catch {
+        return DEFAULT_ABOUT;
+      }
     },
     enabled: !!actor && !isFetching,
+    placeholderData: DEFAULT_ABOUT,
   });
 }
 
@@ -59,7 +78,13 @@ export function useIsAdmin() {
     queryKey: ["isAdmin"],
     queryFn: async () => {
       if (!actor) return false;
-      return actor.isCallerAdmin();
+      try {
+        return await actor.isCallerAdmin();
+      } catch {
+        // isCallerAdmin traps if user is not yet registered.
+        // Treat as "not admin" so the claim flow is shown.
+        return false;
+      }
     },
     enabled: !!actor && !isFetching,
   });
@@ -89,7 +114,11 @@ export function useContactMessages() {
     queryKey: ["contactMessages"],
     queryFn: async () => {
       if (!actor) return [];
-      return actor.getContactMessages();
+      try {
+        return await actor.getContactMessages();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
   });
