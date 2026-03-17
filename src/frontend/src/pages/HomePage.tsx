@@ -4,7 +4,19 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowDown, CheckCircle2, Loader2, Mail, XCircle } from "lucide-react";
+import {
+  ArrowDown,
+  Box,
+  CheckCircle2,
+  Cpu,
+  Layers,
+  Loader2,
+  Mail,
+  PencilRuler,
+  Phone,
+  PlayCircle,
+  XCircle,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import type { Project } from "../backend";
@@ -25,11 +37,20 @@ const CATEGORIES = [
   "Landscape",
 ];
 
+const SERVICES = [
+  { icon: PencilRuler, title: "Architectural Design" },
+  { icon: Box, title: "3D Visualization & Rendering" },
+  { icon: Layers, title: "Interior Design" },
+  { icon: Cpu, title: "Concept Development" },
+  { icon: PlayCircle, title: "Walkthrough Animation" },
+];
+
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactMessage, setContactMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -53,13 +74,17 @@ export default function HomePage() {
     e.preventDefault();
     setSubmitError("");
     try {
+      const fullMessage = contactPhone
+        ? `Phone: ${contactPhone}\n\n${contactMessage}`
+        : contactMessage;
       await submitContact.mutateAsync({
         name: contactName,
         email: contactEmail,
-        message: contactMessage,
+        message: fullMessage,
       });
       setSubmitted(true);
       setContactName("");
+      setContactPhone("");
       setContactEmail("");
       setContactMessage("");
     } catch {
@@ -76,22 +101,18 @@ export default function HomePage() {
         id="hero"
         className="relative min-h-screen flex items-end pb-20 pt-24 overflow-hidden"
       >
-        {/* Background image */}
         <div className="absolute inset-0 z-0">
           <img
             src="/assets/generated/hero-architecture.dim_1600x900.jpg"
             alt="Architecture"
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-30 blur-sm scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background" />
         </div>
-
-        {/* Grid lines decoration */}
         <div className="absolute inset-0 z-0 grid-lines opacity-30" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
           <div className="max-w-4xl">
-            {/* Label */}
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -101,7 +122,6 @@ export default function HomePage() {
               Architect &amp; Designer
             </motion.p>
 
-            {/* Name */}
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -120,7 +140,6 @@ export default function HomePage() {
               )}
             </motion.h1>
 
-            {/* Tagline */}
             <motion.p
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
@@ -153,7 +172,6 @@ export default function HomePage() {
             </motion.div>
           </div>
 
-          {/* Stats line */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -186,11 +204,9 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
-
       {/* Portfolio Grid */}
       <section id="projects" className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          {/* Section header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <motion.div
               initial={{ opacity: 0, x: -24 }}
@@ -205,7 +221,6 @@ export default function HomePage() {
               </h2>
             </motion.div>
 
-            {/* Category tabs */}
             <Tabs
               value={activeCategory}
               onValueChange={setActiveCategory}
@@ -229,7 +244,6 @@ export default function HomePage() {
             </Tabs>
           </div>
 
-          {/* Projects grid */}
           {projectsLoading ? (
             <div
               data-ocid="projects.loading_state"
@@ -271,12 +285,68 @@ export default function HomePage() {
           )}
         </div>
       </section>
+      {/* Services */}
+      <section
+        id="services"
+        data-ocid="services.section"
+        className="py-16 border-t border-border"
+      >
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16">
+            {/* Section label */}
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="shrink-0"
+            >
+              <p className="text-xs tracking-widest uppercase text-accent mb-1">
+                Services
+              </p>
+              <h2 className="font-display text-2xl font-light">
+                Our <em className="italic">Services</em>
+              </h2>
+            </motion.div>
 
+            {/* Services inline chips with stagger */}
+            <div className="flex flex-wrap gap-3">
+              {SERVICES.map((service, idx) => {
+                const Icon = service.icon;
+                const ocidIndex = idx + 1;
+                return (
+                  <motion.div
+                    key={service.title}
+                    data-ocid={`services.card.${ocidIndex}`}
+                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: idx * 0.08 }}
+                    whileHover={{ y: -2 }}
+                    className="flex items-center gap-2 border border-border px-4 py-2 hover:border-accent hover:bg-secondary transition-colors duration-200 group cursor-default"
+                  >
+                    <motion.span
+                      initial={{ rotate: -10, opacity: 0 }}
+                      whileInView={{ rotate: 0, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.35, delay: idx * 0.08 + 0.15 }}
+                    >
+                      <Icon className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
+                    </motion.span>
+                    <span className="text-sm font-light tracking-wide whitespace-nowrap">
+                      {service.title}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
       {/* About */}
       <section id="about" className="py-24 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-            {/* Left: large decorative */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -285,22 +355,14 @@ export default function HomePage() {
               className="relative"
             >
               <div className="aspect-[3/4] bg-secondary relative overflow-hidden">
-                <div className="grid-lines absolute inset-0 opacity-40" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="font-display text-[160px] font-light text-border leading-none select-none">
-                    {about?.name?.[0] ?? "A"}
-                  </span>
-                </div>
-              </div>
-              {/* Floating label */}
-              <div className="absolute -bottom-4 -right-4 bg-accent text-accent-foreground px-6 py-4">
-                <p className="text-xs tracking-widest uppercase font-medium">
-                  Architect
-                </p>
+                <img
+                  src="/assets/uploads/WhatsApp-Image-2026-03-17-at-9.29.31-PM-1.jpeg"
+                  alt="Landcube Studio architectural project"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </motion.div>
 
-            {/* Right: content */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -346,12 +408,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Contact */}
       <section id="contact" className="py-24 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
-            {/* Left: heading */}
             <motion.div
               initial={{ opacity: 0, x: -32 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -369,20 +428,30 @@ export default function HomePage() {
                 Available for new projects, collaborations, and consultations.
                 Share your vision and we&#39;ll craft something extraordinary.
               </p>
-              {about?.contactEmail && (
+              <div className="flex flex-col gap-3">
+                {about?.contactEmail && (
+                  <a
+                    href={`mailto:${about.contactEmail}`}
+                    className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                  >
+                    <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
+                    <span className="border-b border-border group-hover:border-accent transition-colors">
+                      {about.contactEmail}
+                    </span>
+                  </a>
+                )}
                 <a
-                  href={`mailto:${about.contactEmail}`}
+                  href="tel:+971558336172"
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
-                  <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
+                  <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
                   <span className="border-b border-border group-hover:border-accent transition-colors">
-                    {about.contactEmail}
+                    +971 55 833 6172
                   </span>
                 </a>
-              )}
+              </div>
             </motion.div>
 
-            {/* Right: form */}
             <motion.div
               initial={{ opacity: 0, x: 32 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -440,6 +509,24 @@ export default function HomePage() {
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="Your full name"
                         required
+                        className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="contact-phone"
+                        className="text-xs tracking-widest uppercase text-muted-foreground"
+                      >
+                        Phone Number
+                      </Label>
+                      <Input
+                        id="contact-phone"
+                        data-ocid="contact.phone.input"
+                        type="tel"
+                        value={contactPhone}
+                        onChange={(e) => setContactPhone(e.target.value)}
+                        placeholder="Your phone number"
                         className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
                       />
                     </div>
@@ -514,8 +601,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Project detail modal */}
       {selectedProject && (
         <ProjectDetailModal
           project={selectedProject}
