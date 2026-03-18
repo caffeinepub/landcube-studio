@@ -18,13 +18,7 @@ import type { Project } from "../backend";
 import { useImageUpload } from "../hooks/useImageUpload";
 import { useCreateProject, useUpdateProject } from "../hooks/useQueries";
 
-const CATEGORIES = [
-  "Residential",
-  "Commercial",
-  "Public",
-  "Interior",
-  "Landscape",
-];
+const CATEGORIES = ["Residential Buildings", "Interior", "Villas", "Public"];
 
 interface ProjectFormProps {
   project?: Project | null;
@@ -40,9 +34,6 @@ export default function ProjectForm({
   const [title, setTitle] = useState(project?.title ?? "");
   const [description, setDescription] = useState(project?.description ?? "");
   const [category, setCategory] = useState(project?.category ?? "");
-  const [year, setYear] = useState(
-    project ? String(Number(project.year)) : String(new Date().getFullYear()),
-  );
   const [location, setLocation] = useState(project?.location ?? "");
   const [featured, setFeatured] = useState(project?.featured ?? false);
   const [imageIds, setImageIds] = useState<string[]>(project?.imageIds ?? []);
@@ -74,12 +65,12 @@ export default function ProjectForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !category || !year) return;
+    if (!title.trim() || !category) return;
     const data = {
       title: title.trim(),
       description: description.trim(),
       category,
-      year: BigInt(year),
+      year: BigInt(new Date().getFullYear()),
       location: location.trim(),
       imageIds,
       featured,
@@ -124,35 +115,20 @@ export default function ProjectForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Category *</Label>
-          <Select value={category} onValueChange={setCategory} required>
-            <SelectTrigger data-ocid="project.select">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="proj-year">Year *</Label>
-          <Input
-            id="proj-year"
-            data-ocid="project.input"
-            type="number"
-            min="1900"
-            max="2100"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label>Category *</Label>
+        <Select value={category} onValueChange={setCategory} required>
+          <SelectTrigger data-ocid="project.select">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c} value={c}>
+                {c}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

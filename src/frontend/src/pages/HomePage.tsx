@@ -30,11 +30,10 @@ import {
 
 const CATEGORIES = [
   "All",
-  "Residential",
-  "Commercial",
-  "Public",
+  "Residential Buildings",
   "Interior",
-  "Landscape",
+  "Villas",
+  "Public",
 ];
 
 const SERVICES = [
@@ -64,11 +63,6 @@ export default function HomePage() {
     activeCategory === "All"
       ? (projects ?? [])
       : (projects ?? []).filter((p) => p.category === activeCategory);
-
-  const yearRange =
-    projects && projects.length > 0
-      ? `${Math.min(...projects.map((p) => Number(p.year)))}\u2013${Math.max(...projects.map((p) => Number(p.year)))}`
-      : "\u2014";
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,37 +165,6 @@ export default function HomePage() {
               </Button>
             </motion.div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-20 pt-8 border-t border-border flex flex-wrap gap-12"
-          >
-            <div>
-              <p className="font-display text-3xl font-medium">
-                {projects?.length ?? "\u2014"}
-              </p>
-              <p className="text-xs tracking-widest uppercase text-muted-foreground mt-1">
-                Projects
-              </p>
-            </div>
-            <div>
-              <p className="font-display text-3xl font-medium">{yearRange}</p>
-              <p className="text-xs tracking-widest uppercase text-muted-foreground mt-1">
-                Years
-              </p>
-            </div>
-            <div>
-              <p className="font-display text-3xl font-medium">
-                {[...new Set((projects ?? []).map((p) => p.category))].length ||
-                  "\u2014"}
-              </p>
-              <p className="text-xs tracking-widest uppercase text-muted-foreground mt-1">
-                Disciplines
-              </p>
-            </div>
-          </motion.div>
         </div>
       </section>
       {/* Portfolio Grid */}
@@ -213,9 +176,6 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <p className="text-xs tracking-widest uppercase text-accent mb-3">
-                Portfolio
-              </p>
               <h2 className="font-display text-4xl md:text-5xl font-light">
                 Selected <em className="italic">Works</em>
               </h2>
@@ -301,9 +261,6 @@ export default function HomePage() {
               transition={{ duration: 0.5 }}
               className="shrink-0"
             >
-              <p className="text-xs tracking-widest uppercase text-accent mb-1">
-                Services
-              </p>
               <h2 className="font-display text-2xl font-light">
                 Our <em className="italic">Services</em>
               </h2>
@@ -447,6 +404,15 @@ export default function HomePage() {
                   <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
                   <span className="border-b border-border group-hover:border-accent transition-colors">
                     +971 55 833 6172
+                  </span>
+                </a>
+                <a
+                  href="tel:+918296541957"
+                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                  <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
+                  <span className="border-b border-border group-hover:border-accent transition-colors">
+                    +91 82965 41957
                   </span>
                 </a>
               </div>

@@ -52,6 +52,14 @@ import {
   useIsAdmin,
 } from "../hooks/useQueries";
 
+const PROJECT_FILTERS = [
+  "All",
+  "Residential Buildings",
+  "Interior",
+  "Villas",
+  "Public",
+];
+
 interface AdminPageProps {
   onBack: () => void;
 }
@@ -73,6 +81,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claiming, setClaiming] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("All");
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -112,9 +121,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
     }
     setClaiming(true);
     try {
-      // Call resetAndClaimAdmin directly on the actor.
-      // This works even if _initializeAccessControlWithSecret failed,
-      // because resetAndClaimAdmin only needs assertNotAnonymous.
       await actor.resetAndClaimAdmin();
       await queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
       await queryClient.refetchQueries({ queryKey: ["isAdmin"] });
@@ -130,6 +136,11 @@ export default function AdminPage({ onBack }: AdminPageProps) {
       setClaiming(false);
     }
   };
+
+  const filteredProjects =
+    activeFilter === "All"
+      ? (projects ?? [])
+      : (projects ?? []).filter((p) => p.category === activeFilter);
 
   const isLoading = adminLoading || actorFetching;
 
@@ -260,6 +271,25 @@ export default function AdminPage({ onBack }: AdminPageProps) {
           </TabsList>
 
           <TabsContent value="projects">
+            {/* Category filter chips */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {PROJECT_FILTERS.map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  data-ocid="admin.projects.tab"
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-4 py-1.5 text-xs tracking-widest uppercase border transition-colors ${
+                    activeFilter === filter
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-transparent text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+
             {projectsLoading ? (
               <div data-ocid="admin.loading_state" className="space-y-3">
                 {[1, 2, 3].map((i) => (
@@ -281,6 +311,15 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                   <Plus className="h-4 w-4" /> Add First Project
                 </Button>
               </div>
+            ) : filteredProjects.length === 0 ? (
+              <div
+                data-ocid="admin.empty_state"
+                className="py-16 text-center border border-dashed border-border"
+              >
+                <p className="text-muted-foreground">
+                  No projects in this category
+                </p>
+              </div>
             ) : (
               <div className="border border-border" data-ocid="admin.table">
                 <Table>
@@ -295,9 +334,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                       <TableHead className="text-xs tracking-widest uppercase hidden md:table-cell">
                         Category
                       </TableHead>
-                      <TableHead className="text-xs tracking-widest uppercase hidden md:table-cell">
-                        Year
-                      </TableHead>
                       <TableHead className="text-xs tracking-widest uppercase hidden lg:table-cell">
                         Location
                       </TableHead>
@@ -310,7 +346,7 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {projects.map((project, idx) => (
+                    {filteredProjects.map((project, idx) => (
                       <TableRow
                         key={String(project.id)}
                         data-ocid={`admin.row.${idx + 1}`}
@@ -324,9 +360,6 @@ export default function AdminPage({ onBack }: AdminPageProps) {
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                           {project.category}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
-                          {Number(project.year)}
                         </TableCell>
                         <TableCell className="hidden lg:table-cell text-muted-foreground text-sm">
                           {project.location}
