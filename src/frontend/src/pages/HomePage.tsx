@@ -303,29 +303,31 @@ export default function HomePage() {
       {/* About */}
       <section id="about" className="py-24 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+            {/* Left: Image */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-              className="relative"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="w-full"
             >
-              <div className="aspect-[3/4] bg-secondary relative overflow-hidden">
+              <div className="aspect-[3/4] w-full overflow-hidden">
                 <img
-                  src="/assets/uploads/WhatsApp-Image-2026-03-17-at-9.29.31-PM-1.jpeg"
-                  alt="Landcube Studio architectural project"
+                  src="/assets/uploads/0A40258E-3A6A-46EB-B8A7-77A9F8910FEE-3-1.png"
+                  alt="Landcube Studio"
                   className="w-full h-full object-cover"
                 />
               </div>
             </motion.div>
 
+            {/* Right: Text content */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 32 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-              className="space-y-8"
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="space-y-8 lg:pt-8"
             >
               <div>
                 <p className="text-xs tracking-widest uppercase text-accent mb-4">
