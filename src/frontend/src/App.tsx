@@ -2,7 +2,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
-import WhatsAppButton from "./components/WhatsAppButton";
 import AdminPage from "./pages/AdminPage";
 import HomePage from "./pages/HomePage";
 
@@ -25,7 +24,6 @@ export default function App() {
         )}
       </main>
       <Footer />
-      <WhatsAppButton />
       <Toaster />
     </div>
   );
