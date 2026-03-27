@@ -99,11 +99,11 @@ export default function HomePage() {
           <img
             src="/assets/generated/hero-architecture.dim_1600x900.jpg"
             alt="Architecture"
-            className="w-full h-full object-cover opacity-30 blur-sm scale-105"
+            className="w-full h-full object-cover opacity-50 blur-sm scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/40 to-background" />
         </div>
-        <div className="absolute inset-0 z-0 grid-lines opacity-30" />
+        <div className="absolute inset-0 z-0 grid-lines opacity-40" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 w-full">
           <div className="max-w-4xl">
@@ -127,9 +127,9 @@ export default function HomePage() {
               ) : (
                 <>
                   {about?.name?.split(" ").slice(0, -1).join(" ") || "Landcube"}{" "}
-                  <em className="italic">
+                  <span className="text-accent">
                     {about?.name?.split(" ").slice(-1)[0] || "Studio"}
-                  </em>
+                  </span>
                 </>
               )}
             </motion.h1>
@@ -157,7 +157,7 @@ export default function HomePage() {
                 variant="default"
                 size="lg"
                 asChild
-                className="rounded-none text-xs tracking-widest uppercase font-medium px-8 h-12"
+                className="rounded-none text-xs tracking-widest uppercase font-medium px-8 h-12 border border-accent bg-transparent text-accent hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 <a href="#projects">
                   View Projects <ArrowDown className="ml-2 h-4 w-4" />
@@ -167,6 +167,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
       {/* Portfolio Grid */}
       <section id="projects" className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -175,33 +176,41 @@ export default function HomePage() {
               initial={{ opacity: 0, x: -24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
             >
               <h2 className="font-display text-4xl md:text-5xl font-light">
-                Selected <em className="italic">Works</em>
+                Selected <span className="text-accent">Works</span>
               </h2>
             </motion.div>
 
-            <Tabs
-              value={activeCategory}
-              onValueChange={setActiveCategory}
-              className="w-full md:w-auto"
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 }}
             >
-              <TabsList
-                data-ocid="projects.tab"
-                className="bg-secondary flex-wrap h-auto gap-1 p-1"
+              <Tabs
+                value={activeCategory}
+                onValueChange={setActiveCategory}
+                className="w-full md:w-auto"
               >
-                {CATEGORIES.map((cat) => (
-                  <TabsTrigger
-                    key={cat}
-                    value={cat}
-                    data-ocid="projects.tab"
-                    className="text-xs tracking-wide rounded-none data-[state=active]:bg-foreground data-[state=active]:text-background"
-                  >
-                    {cat}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+                <TabsList
+                  data-ocid="projects.tab"
+                  className="bg-secondary flex-wrap h-auto gap-1 p-1"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <TabsTrigger
+                      key={cat}
+                      value={cat}
+                      data-ocid="projects.tab"
+                      className="text-xs tracking-wide rounded-none data-[state=active]:bg-accent data-[state=active]:text-accent-foreground"
+                    >
+                      {cat}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </motion.div>
           </div>
 
           {projectsLoading ? (
@@ -218,8 +227,12 @@ export default function HomePage() {
               ))}
             </div>
           ) : filteredProjects.length === 0 ? (
-            <div
+            <motion.div
               data-ocid="projects.empty_state"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
               className="relative py-24 text-center border border-dashed border-border"
             >
               <p className="font-display text-2xl text-muted-foreground mb-2">
@@ -230,7 +243,7 @@ export default function HomePage() {
                   ? "Projects will appear here once added."
                   : `No ${activeCategory} projects found.`}
               </p>
-            </div>
+            </motion.div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
               {filteredProjects.map((project, idx) => (
@@ -245,6 +258,7 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
       {/* Services */}
       <section
         id="services"
@@ -262,7 +276,7 @@ export default function HomePage() {
               className="shrink-0"
             >
               <h2 className="font-display text-2xl font-light">
-                Our <em className="italic">Services</em>
+                Our <span className="text-accent">Services</span>
               </h2>
             </motion.div>
 
@@ -300,6 +314,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
       {/* About */}
       <section id="about" className="py-24 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -342,7 +357,7 @@ export default function HomePage() {
                 </h2>
               </div>
               <div className="border-l-2 border-accent pl-6">
-                <p className="font-display text-xl italic text-muted-foreground">
+                <p className="font-display text-xl text-muted-foreground">
                   {aboutLoading ? (
                     <Skeleton className="h-7 w-72" />
                   ) : (
@@ -367,6 +382,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Contact */}
       <section id="contact" className="py-24 border-t border-border">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
@@ -381,7 +398,7 @@ export default function HomePage() {
                 Get In Touch
               </p>
               <h2 className="font-display text-4xl md:text-5xl font-light mb-6 leading-tight">
-                Let&#39;s Create <em className="italic">Together</em>
+                Let&#39;s Create <span className="text-accent">Together</span>
               </h2>
               <p className="text-muted-foreground leading-relaxed mb-8">
                 Available for new projects, collaborations, and consultations.
@@ -483,7 +500,13 @@ export default function HomePage() {
                     onSubmit={handleContactSubmit}
                     className="space-y-6"
                   >
-                    <div className="space-y-2">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.1 }}
+                      className="space-y-2"
+                    >
                       <Label
                         htmlFor="contact-name"
                         className="text-xs tracking-widest uppercase text-muted-foreground"
@@ -499,9 +522,15 @@ export default function HomePage() {
                         required
                         className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
                       />
-                    </div>
+                    </motion.div>
 
-                    <div className="space-y-2">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.18 }}
+                      className="space-y-2"
+                    >
                       <Label
                         htmlFor="contact-phone"
                         className="text-xs tracking-widest uppercase text-muted-foreground"
@@ -517,9 +546,15 @@ export default function HomePage() {
                         placeholder="Your phone number"
                         className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
                       />
-                    </div>
+                    </motion.div>
 
-                    <div className="space-y-2">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.26 }}
+                      className="space-y-2"
+                    >
                       <Label
                         htmlFor="contact-email"
                         className="text-xs tracking-widest uppercase text-muted-foreground"
@@ -536,9 +571,15 @@ export default function HomePage() {
                         required
                         className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
                       />
-                    </div>
+                    </motion.div>
 
-                    <div className="space-y-2">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.34 }}
+                      className="space-y-2"
+                    >
                       <Label
                         htmlFor="contact-message"
                         className="text-xs tracking-widest uppercase text-muted-foreground"
@@ -555,33 +596,43 @@ export default function HomePage() {
                         rows={5}
                         className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 resize-none focus-visible:ring-0 focus-visible:border-accent transition-colors"
                       />
-                    </div>
+                    </motion.div>
 
                     {submitError && (
-                      <div
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
                         data-ocid="contact.error_state"
                         className="flex items-center gap-2 text-destructive text-sm"
                       >
                         <XCircle className="h-4 w-4 shrink-0" />
                         <span>{submitError}</span>
-                      </div>
+                      </motion.div>
                     )}
 
-                    <Button
-                      data-ocid="contact.submit_button"
-                      type="submit"
-                      disabled={submitContact.isPending}
-                      className="w-full rounded-none text-xs tracking-widest uppercase h-12"
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.42 }}
                     >
-                      {submitContact.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        "Send Message"
-                      )}
-                    </Button>
+                      <Button
+                        data-ocid="contact.submit_button"
+                        type="submit"
+                        disabled={submitContact.isPending}
+                        className="w-full rounded-none text-xs tracking-widest uppercase h-12 bg-accent text-accent-foreground hover:bg-accent/90"
+                      >
+                        {submitContact.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          "Send Message"
+                        )}
+                      </Button>
+                    </motion.div>
                   </motion.form>
                 )}
               </AnimatePresence>
@@ -589,6 +640,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
       {selectedProject && (
         <ProjectDetailModal
           project={selectedProject}

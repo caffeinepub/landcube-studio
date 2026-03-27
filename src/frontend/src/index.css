@@ -1,4 +1,16 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap");
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/assets/fonts/Satoshi.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -6,94 +18,83 @@
 
 @layer base {
   :root {
-    /* Warm off-white background, editorial gallery */
-    --background: 0.975 0.007 80;
-    --foreground: 0.13 0.012 280;
+    /* Dark contemporary — near-black cool concrete */
+    --background: 0.08 0.008 250;
+    --foreground: 0.96 0.005 80;
 
-    --card: 0.98 0.005 80;
-    --card-foreground: 0.13 0.012 280;
+    --card: 0.11 0.008 250;
+    --card-foreground: 0.96 0.005 80;
 
-    --popover: 0.99 0.003 80;
-    --popover-foreground: 0.13 0.012 280;
+    --popover: 0.11 0.008 250;
+    --popover-foreground: 0.96 0.005 80;
 
-    /* Deep charcoal primary */
-    --primary: 0.18 0.012 280;
-    --primary-foreground: 0.975 0.007 80;
+    /* White primary */
+    --primary: 0.96 0.005 80;
+    --primary-foreground: 0.08 0.008 250;
 
-    /* Warm stone secondary */
-    --secondary: 0.92 0.015 80;
-    --secondary-foreground: 0.18 0.012 280;
+    --secondary: 0.14 0.008 250;
+    --secondary-foreground: 0.96 0.005 80;
 
-    /* Muted warm gray */
-    --muted: 0.94 0.01 80;
-    --muted-foreground: 0.5 0.015 80;
+    --muted: 0.15 0.006 250;
+    --muted-foreground: 0.55 0.01 250;
 
-    /* Terracotta accent */
-    --accent: 0.58 0.13 45;
-    --accent-foreground: 0.975 0.007 80;
+    /* Electric lime accent */
+    --accent: 0.82 0.22 130;
+    --accent-foreground: 0.08 0.008 250;
 
     --destructive: 0.55 0.18 25;
-    --destructive-foreground: 0.975 0.007 80;
+    --destructive-foreground: 0.96 0.005 80;
 
-    --border: 0.86 0.012 80;
-    --input: 0.86 0.012 80;
-    --ring: 0.58 0.13 45;
+    --border: 0.2 0.008 250;
+    --input: 0.2 0.008 250;
+    --ring: 0.82 0.22 130;
 
-    --radius: 2px;
+    --radius: 0px;
 
-    --chart-1: 0.58 0.13 45;
-    --chart-2: 0.45 0.1 200;
-    --chart-3: 0.65 0.1 140;
-    --chart-4: 0.55 0.12 310;
-    --chart-5: 0.7 0.08 60;
+    --chart-1: 0.82 0.22 130;
+    --chart-2: 0.65 0.18 200;
+    --chart-3: 0.7 0.15 160;
+    --chart-4: 0.6 0.14 310;
+    --chart-5: 0.75 0.1 60;
 
-    --sidebar: 0.97 0.007 80;
-    --sidebar-foreground: 0.13 0.012 280;
-    --sidebar-primary: 0.18 0.012 280;
-    --sidebar-primary-foreground: 0.975 0.007 80;
-    --sidebar-accent: 0.94 0.01 80;
-    --sidebar-accent-foreground: 0.18 0.012 280;
-    --sidebar-border: 0.86 0.012 80;
-    --sidebar-ring: 0.58 0.13 45;
+    --sidebar: 0.1 0.008 250;
+    --sidebar-foreground: 0.96 0.005 80;
+    --sidebar-primary: 0.82 0.22 130;
+    --sidebar-primary-foreground: 0.08 0.008 250;
+    --sidebar-accent: 0.15 0.008 250;
+    --sidebar-accent-foreground: 0.96 0.005 80;
+    --sidebar-border: 0.2 0.008 250;
+    --sidebar-ring: 0.82 0.22 130;
   }
 
   .dark {
-    --background: 0.1 0.012 280;
-    --foreground: 0.96 0.007 80;
-
-    --card: 0.13 0.012 280;
-    --card-foreground: 0.96 0.007 80;
-
-    --popover: 0.13 0.012 280;
-    --popover-foreground: 0.96 0.007 80;
-
-    --primary: 0.96 0.007 80;
-    --primary-foreground: 0.1 0.012 280;
-
-    --secondary: 0.2 0.015 280;
-    --secondary-foreground: 0.96 0.007 80;
-
-    --muted: 0.2 0.01 280;
-    --muted-foreground: 0.6 0.015 80;
-
-    --accent: 0.62 0.14 45;
-    --accent-foreground: 0.975 0.007 80;
-
+    --background: 0.08 0.008 250;
+    --foreground: 0.96 0.005 80;
+    --card: 0.11 0.008 250;
+    --card-foreground: 0.96 0.005 80;
+    --popover: 0.11 0.008 250;
+    --popover-foreground: 0.96 0.005 80;
+    --primary: 0.96 0.005 80;
+    --primary-foreground: 0.08 0.008 250;
+    --secondary: 0.14 0.008 250;
+    --secondary-foreground: 0.96 0.005 80;
+    --muted: 0.15 0.006 250;
+    --muted-foreground: 0.55 0.01 250;
+    --accent: 0.82 0.22 130;
+    --accent-foreground: 0.08 0.008 250;
     --destructive: 0.55 0.18 25;
-    --destructive-foreground: 0.975 0.007 80;
-
-    --border: 0.22 0.015 280;
-    --input: 0.22 0.015 280;
-    --ring: 0.62 0.14 45;
-
-    --sidebar: 0.12 0.012 280;
-    --sidebar-foreground: 0.96 0.007 80;
-    --sidebar-primary: 0.62 0.14 45;
-    --sidebar-primary-foreground: 0.975 0.007 80;
-    --sidebar-accent: 0.18 0.012 280;
-    --sidebar-accent-foreground: 0.96 0.007 80;
-    --sidebar-border: 0.22 0.015 280;
-    --sidebar-ring: 0.62 0.14 45;
+    --destructive-foreground: 0.96 0.005 80;
+    --border: 0.2 0.008 250;
+    --input: 0.2 0.008 250;
+    --ring: 0.82 0.22 130;
+    --sidebar: 0.1 0.008 250;
+    --sidebar-foreground: 0.96 0.005 80;
+    --sidebar-primary: 0.82 0.22 130;
+    --sidebar-primary-foreground: 0.08 0.008 250;
+    --sidebar-accent: 0.15 0.008 250;
+    --sidebar-accent-foreground: 0.96 0.005 80;
+    --sidebar-border: 0.2 0.008 250;
+    --sidebar-ring: 0.82 0.22 130;
   }
 
   * {
@@ -109,20 +110,21 @@
   }
 
   ::selection {
-    background-color: oklch(var(--accent) / 0.2);
+    background-color: oklch(var(--accent) / 0.25);
+    color: oklch(var(--accent-foreground));
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: "Playfair Display", Georgia, serif;
+    font-family: "Bricolage Grotesque", sans-serif;
   }
 
   .grid-lines {
     background-image: linear-gradient(
-        oklch(var(--border) / 0.6) 1px,
+        oklch(var(--border) / 0.5) 1px,
         transparent 1px
-      ), linear-gradient(90deg, oklch(var(--border) / 0.6) 1px, transparent 1px);
+      ), linear-gradient(90deg, oklch(var(--border) / 0.5) 1px, transparent 1px);
     background-size: 60px 60px;
   }
 
