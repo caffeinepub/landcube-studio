@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useQueryClient } from "@tanstack/react-query";
 import { Menu, Settings, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useAboutContent } from "../hooks/useQueries";
@@ -92,7 +93,12 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border">
+    <motion.header
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border"
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 h-16 flex items-center justify-between">
         {/* Logo */}
         <button
@@ -233,29 +239,38 @@ export default function Navbar({ currentView, onNavigate }: NavbarProps) {
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-background border-t border-border px-6 py-6 flex flex-col gap-6">
-          {currentView === "home" &&
-            navLinks.map((link, i) => (
-              <a
-                key={link.label}
-                data-ocid="nav.link"
-                href={link.href}
-                onClick={() => {
-                  setActiveIndex(i);
-                  setMobileOpen(false);
-                }}
-                className={`text-sm font-medium tracking-wide uppercase transition-colors ${
-                  activeIndex === i
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
-        </div>
-      )}
-    </header>
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            key="mobile-menu"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="md:hidden overflow-hidden bg-background border-t border-border px-6 py-6 flex flex-col gap-6"
+          >
+            {currentView === "home" &&
+              navLinks.map((link, i) => (
+                <a
+                  key={link.label}
+                  data-ocid="nav.link"
+                  href={link.href}
+                  onClick={() => {
+                    setActiveIndex(i);
+                    setMobileOpen(false);
+                  }}
+                  className={`text-sm font-medium tracking-wide uppercase transition-colors ${
+                    activeIndex === i
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }
