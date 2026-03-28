@@ -24,7 +24,7 @@ export default function ProjectCard({
       data-ocid={`projects.item.${index + 1}`}
       initial={{ opacity: 0, y: 32 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: (index % 3) * 0.1 }}
       onClick={() => onClick(project)}
       className="group cursor-pointer"
@@ -55,7 +55,7 @@ export default function ProjectCard({
       {/* Info */}
       <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-display text-lg font-medium text-foreground group-hover:text-accent transition-colors leading-snug">
+          <h3 className="font-display text-lg font-medium text-foreground group-hover:text-white transition-colors leading-snug">
             {project.title}
           </h3>
           <span className="text-xs text-muted-foreground shrink-0 mt-1">

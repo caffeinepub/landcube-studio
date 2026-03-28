@@ -117,7 +117,7 @@ export default function HomePage() {
             </motion.p>
 
             <motion.h1
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               className="font-display text-6xl md:text-8xl lg:text-9xl font-light text-foreground leading-none tracking-tight mb-6"
@@ -135,7 +135,7 @@ export default function HomePage() {
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-12"
@@ -148,7 +148,7 @@ export default function HomePage() {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
@@ -173,9 +173,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <motion.div
-              initial={{ opacity: 0, x: -24 }}
+              initial={{ opacity: 0, x: -32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6 }}
             >
               <h2 className="font-display text-4xl md:text-5xl font-light">
@@ -184,9 +184,9 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.5, delay: 0.15 }}
             >
               <Tabs
@@ -214,24 +214,35 @@ export default function HomePage() {
           </div>
 
           {projectsLoading ? (
-            <div
+            <motion.div
               data-ocid="projects.loading_state"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.5 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             >
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="space-y-3">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.4, delay: (i - 1) * 0.07 }}
+                  className="space-y-3"
+                >
                   <Skeleton className="aspect-[4/3] w-full" />
                   <Skeleton className="h-5 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : filteredProjects.length === 0 ? (
             <motion.div
               data-ocid="projects.empty_state"
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 32 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6 }}
               className="relative py-24 text-center border border-dashed border-border"
             >
@@ -269,9 +280,9 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16">
             {/* Section label */}
             <motion.div
-              initial={{ opacity: 0, x: -24 }}
+              initial={{ opacity: 0, x: -32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.5 }}
               className="shrink-0"
             >
@@ -289,18 +300,18 @@ export default function HomePage() {
                   <motion.div
                     key={service.title}
                     data-ocid={`services.card.${ocidIndex}`}
-                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                    initial={{ opacity: 0, y: 16, scale: 0.92 }}
                     whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: idx * 0.08 }}
-                    whileHover={{ y: -2 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.4, delay: idx * 0.09 }}
+                    whileHover={{ y: -3, scale: 1.02 }}
                     className="flex items-center gap-2 border border-border px-4 py-2 hover:border-accent hover:bg-secondary transition-colors duration-200 group cursor-default"
                   >
                     <motion.span
                       initial={{ rotate: -10, opacity: 0 }}
                       whileInView={{ rotate: 0, opacity: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.35, delay: idx * 0.08 + 0.15 }}
+                      viewport={{ once: true, margin: "-60px" }}
+                      transition={{ duration: 0.35, delay: idx * 0.09 + 0.15 }}
                     >
                       <Icon className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
                     </motion.span>
@@ -321,9 +332,9 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
             {/* Left: Image */}
             <motion.div
-              initial={{ opacity: 0, x: -40 }}
+              initial={{ opacity: 0, x: -48 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="w-full"
             >
@@ -338,13 +349,18 @@ export default function HomePage() {
 
             {/* Right: Text content */}
             <motion.div
-              initial={{ opacity: 0, y: 32 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.15 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, delay: 0.1 }}
               className="space-y-8 lg:pt-8"
             >
-              <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+              >
                 <p className="text-xs tracking-widest uppercase text-accent mb-4">
                   About
                 </p>
@@ -355,8 +371,15 @@ export default function HomePage() {
                     about?.name || "Landcube Studio"
                   )}
                 </h2>
-              </div>
-              <div className="border-l-2 border-accent pl-6">
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="border-l-2 border-accent pl-6"
+              >
                 <p className="font-display text-xl text-muted-foreground">
                   {aboutLoading ? (
                     <Skeleton className="h-7 w-72" />
@@ -364,8 +387,15 @@ export default function HomePage() {
                     about?.tagline || ""
                   )}
                 </p>
-              </div>
-              <div className="text-foreground/70 leading-relaxed space-y-4">
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="text-foreground/70 leading-relaxed space-y-4"
+              >
                 {aboutLoading ? (
                   <>
                     <Skeleton className="h-4 w-full" />
@@ -377,7 +407,26 @@ export default function HomePage() {
                     {about?.bio || "Architect's bio will appear here."}
                   </p>
                 )}
-              </div>
+              </motion.div>
+
+              {about?.contactEmail && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  <a
+                    href={`mailto:${about.contactEmail}`}
+                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                  >
+                    <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
+                    <span className="border-b border-border group-hover:border-accent transition-colors">
+                      {about.contactEmail}
+                    </span>
+                  </a>
+                </motion.div>
+              )}
             </motion.div>
           </div>
         </div>
@@ -388,9 +437,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
             <motion.div
-              initial={{ opacity: 0, x: -32 }}
+              initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7 }}
               className="flex flex-col justify-center"
             >
@@ -406,38 +455,54 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col gap-3">
                 {about?.contactEmail && (
-                  <a
+                  <motion.a
                     href={`mailto:${about.contactEmail}`}
+                    initial={{ opacity: 0, x: -16 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-60px" }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
                     className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                   >
                     <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
                     <span className="border-b border-border group-hover:border-accent transition-colors">
                       {about.contactEmail}
                     </span>
-                  </a>
+                  </motion.a>
                 )}
-                <a
+                <motion.a
                   href="tel:+971558336172"
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
                   <span className="border-b border-border group-hover:border-accent transition-colors">
                     +971 55 833 6172
                   </span>
-                </a>
-                <a
+                </motion.a>
+                <motion.a
                   href="tel:+918296541957"
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
                   <span className="border-b border-border group-hover:border-accent transition-colors">
                     +91 82965 41957
                   </span>
-                </a>
-                <a
+                </motion.a>
+                <motion.a
                   href="https://wa.me/971558336172"
                   target="_blank"
                   rel="noopener noreferrer"
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <svg
@@ -453,14 +518,14 @@ export default function HomePage() {
                   <span className="border-b border-border group-hover:border-[#25D366] transition-colors">
                     Chat on WhatsApp
                   </span>
-                </a>
+                </motion.a>
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 32 }}
+              initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.7 }}
             >
               <AnimatePresence mode="wait">
@@ -503,7 +568,7 @@ export default function HomePage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: true, margin: "-60px" }}
                       transition={{ duration: 0.5, delay: 0.1 }}
                       className="space-y-2"
                     >
@@ -527,7 +592,7 @@ export default function HomePage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: true, margin: "-60px" }}
                       transition={{ duration: 0.5, delay: 0.18 }}
                       className="space-y-2"
                     >
@@ -551,7 +616,7 @@ export default function HomePage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: true, margin: "-60px" }}
                       transition={{ duration: 0.5, delay: 0.26 }}
                       className="space-y-2"
                     >
@@ -576,7 +641,7 @@ export default function HomePage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: true, margin: "-60px" }}
                       transition={{ duration: 0.5, delay: 0.34 }}
                       className="space-y-2"
                     >
@@ -614,7 +679,7 @@ export default function HomePage() {
                     <motion.div
                       initial={{ opacity: 0, y: 16 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: true, margin: "-60px" }}
                       transition={{ duration: 0.5, delay: 0.42 }}
                     >
                       <Button

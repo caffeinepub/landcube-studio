@@ -6,17 +6,29 @@ export default function Footer() {
 
   return (
     <motion.footer
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.6 }}
       className="border-t border-border mt-24"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-xs text-muted-foreground tracking-widest uppercase">
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-xs text-muted-foreground tracking-widest uppercase"
+        >
           © {year}. All rights reserved.
-        </p>
-        <p className="text-xs text-muted-foreground">
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-xs text-muted-foreground"
+        >
           Built with ♥ using{" "}
           <a
             href={utmLink}
@@ -26,7 +38,7 @@ export default function Footer() {
           >
             caffeine.ai
           </a>
-        </p>
+        </motion.p>
       </div>
     </motion.footer>
   );

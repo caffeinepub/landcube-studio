@@ -18,83 +18,82 @@
 
 @layer base {
   :root {
-    /* Dark contemporary — near-black cool concrete */
-    --background: 0.08 0.008 250;
-    --foreground: 0.96 0.005 80;
+    /* Pure black & white monochrome theme */
+    --background: 0.04 0 0;
+    --foreground: 0.97 0 0;
 
-    --card: 0.11 0.008 250;
-    --card-foreground: 0.96 0.005 80;
+    --card: 0.08 0 0;
+    --card-foreground: 0.97 0 0;
 
-    --popover: 0.11 0.008 250;
-    --popover-foreground: 0.96 0.005 80;
+    --popover: 0.08 0 0;
+    --popover-foreground: 0.97 0 0;
 
-    /* White primary */
-    --primary: 0.96 0.005 80;
-    --primary-foreground: 0.08 0.008 250;
+    --primary: 0.97 0 0;
+    --primary-foreground: 0.04 0 0;
 
-    --secondary: 0.14 0.008 250;
-    --secondary-foreground: 0.96 0.005 80;
+    --secondary: 0.12 0 0;
+    --secondary-foreground: 0.97 0 0;
 
-    --muted: 0.15 0.006 250;
-    --muted-foreground: 0.55 0.01 250;
+    --muted: 0.15 0 0;
+    --muted-foreground: 0.5 0 0;
 
-    /* Electric lime accent */
-    --accent: 0.82 0.22 130;
-    --accent-foreground: 0.08 0.008 250;
+    /* White accent — replaces lime-green */
+    --accent: 0.97 0 0;
+    --accent-foreground: 0.04 0 0;
 
     --destructive: 0.55 0.18 25;
-    --destructive-foreground: 0.96 0.005 80;
+    --destructive-foreground: 0.97 0 0;
 
-    --border: 0.2 0.008 250;
-    --input: 0.2 0.008 250;
-    --ring: 0.82 0.22 130;
+    --border: 0.22 0 0;
+    --input: 0.22 0 0;
+    --ring: 0.97 0 0;
 
     --radius: 0px;
 
-    --chart-1: 0.82 0.22 130;
-    --chart-2: 0.65 0.18 200;
-    --chart-3: 0.7 0.15 160;
-    --chart-4: 0.6 0.14 310;
-    --chart-5: 0.75 0.1 60;
+    --chart-1: 0.97 0 0;
+    --chart-2: 0.75 0 0;
+    --chart-3: 0.55 0 0;
+    --chart-4: 0.35 0 0;
+    --chart-5: 0.2 0 0;
 
-    --sidebar: 0.1 0.008 250;
-    --sidebar-foreground: 0.96 0.005 80;
-    --sidebar-primary: 0.82 0.22 130;
-    --sidebar-primary-foreground: 0.08 0.008 250;
-    --sidebar-accent: 0.15 0.008 250;
-    --sidebar-accent-foreground: 0.96 0.005 80;
-    --sidebar-border: 0.2 0.008 250;
-    --sidebar-ring: 0.82 0.22 130;
+    --sidebar: 0.08 0 0;
+    --sidebar-foreground: 0.97 0 0;
+    --sidebar-primary: 0.97 0 0;
+    --sidebar-primary-foreground: 0.04 0 0;
+    --sidebar-accent: 0.15 0 0;
+    --sidebar-accent-foreground: 0.97 0 0;
+    --sidebar-border: 0.22 0 0;
+    --sidebar-ring: 0.97 0 0;
   }
 
   .dark {
-    --background: 0.08 0.008 250;
-    --foreground: 0.96 0.005 80;
-    --card: 0.11 0.008 250;
-    --card-foreground: 0.96 0.005 80;
-    --popover: 0.11 0.008 250;
-    --popover-foreground: 0.96 0.005 80;
-    --primary: 0.96 0.005 80;
-    --primary-foreground: 0.08 0.008 250;
-    --secondary: 0.14 0.008 250;
-    --secondary-foreground: 0.96 0.005 80;
-    --muted: 0.15 0.006 250;
-    --muted-foreground: 0.55 0.01 250;
-    --accent: 0.82 0.22 130;
-    --accent-foreground: 0.08 0.008 250;
+    --background: 0.04 0 0;
+    --foreground: 0.97 0 0;
+    --card: 0.08 0 0;
+    --card-foreground: 0.97 0 0;
+    --popover: 0.08 0 0;
+    --popover-foreground: 0.97 0 0;
+    --primary: 0.97 0 0;
+    --primary-foreground: 0.04 0 0;
+    --secondary: 0.12 0 0;
+    --secondary-foreground: 0.97 0 0;
+    --muted: 0.15 0 0;
+    --muted-foreground: 0.5 0 0;
+    --accent: 0.97 0 0;
+    --accent-foreground: 0.04 0 0;
     --destructive: 0.55 0.18 25;
-    --destructive-foreground: 0.96 0.005 80;
-    --border: 0.2 0.008 250;
-    --input: 0.2 0.008 250;
-    --ring: 0.82 0.22 130;
-    --sidebar: 0.1 0.008 250;
-    --sidebar-foreground: 0.96 0.005 80;
-    --sidebar-primary: 0.82 0.22 130;
-    --sidebar-primary-foreground: 0.08 0.008 250;
-    --sidebar-accent: 0.15 0.008 250;
-    --sidebar-accent-foreground: 0.96 0.005 80;
-    --sidebar-border: 0.2 0.008 250;
-    --sidebar-ring: 0.82 0.22 130;
+    --destructive-foreground: 0.97 0 0;
+    --border: 0.22 0 0;
+    --input: 0.22 0 0;
+    --ring: 0.97 0 0;
+    --sidebar: 0.08 0 0;
+    --sidebar-foreground: 0.97 0 0;
+    --sidebar-primary: 0.97 0 0;
+    --sidebar-primary-foreground: 0.04 0 0;
+    --sidebar-accent: 0.15 0 0;
+    --sidebar-accent-foreground: 0.97 0 0;
+    --sidebar-border: 0.22 0 0;
+    --sidebar-ring: 0.97 0 0;
   }
 
   * {
@@ -110,8 +109,8 @@
   }
 
   ::selection {
-    background-color: oklch(var(--accent) / 0.25);
-    color: oklch(var(--accent-foreground));
+    background-color: oklch(var(--foreground) / 0.2);
+    color: oklch(var(--background));
   }
 }
 
