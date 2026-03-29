@@ -11,6 +11,7 @@ import {
   Cpu,
   Layers,
   Loader2,
+  Mail,
   PencilRuler,
   Phone,
   PlayCircle,
@@ -458,13 +459,26 @@ export default function HomePage() {
                   </span>
                 </motion.a>
                 <motion.a
+                  href="mailto:landcube0@gmail.com"
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
+                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                >
+                  <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
+                  <span className="border-b border-border group-hover:border-accent transition-colors">
+                    landcube0@gmail.com
+                  </span>
+                </motion.a>
+                <motion.a
                   href="https://wa.me/971558336172"
                   target="_blank"
                   rel="noopener noreferrer"
                   initial={{ opacity: 0, x: -16 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <svg
