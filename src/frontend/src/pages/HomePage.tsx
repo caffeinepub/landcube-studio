@@ -11,7 +11,6 @@ import {
   Cpu,
   Layers,
   Loader2,
-  Mail,
   PencilRuler,
   Phone,
   PlayCircle,
@@ -274,54 +273,51 @@ export default function HomePage() {
       <section
         id="services"
         data-ocid="services.section"
-        className="py-16 border-t border-border"
+        className="py-24 border-t border-border"
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16">
-            {/* Section label */}
-            <motion.div
-              initial={{ opacity: 0, x: -32 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5 }}
-              className="shrink-0"
-            >
-              <h2 className="font-display text-2xl font-light">
-                Our <span className="text-accent">Services</span>
-              </h2>
-            </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -32 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.5 }}
+            className="mb-12"
+          >
+            <h2 className="font-display text-4xl md:text-5xl font-light">
+              Our <span className="text-accent">Services</span>
+            </h2>
+          </motion.div>
 
-            {/* Services inline chips with stagger */}
-            <div className="flex flex-wrap gap-3">
-              {SERVICES.map((service, idx) => {
-                const Icon = service.icon;
-                const ocidIndex = idx + 1;
-                return (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {SERVICES.map((service, idx) => {
+              const Icon = service.icon;
+              const ocidIndex = idx + 1;
+              return (
+                <motion.div
+                  key={service.title}
+                  data-ocid={`services.card.${ocidIndex}`}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.45, delay: idx * 0.1 }}
+                  whileHover={{ y: -6, scale: 1.03 }}
+                  className="group flex flex-col items-center justify-center gap-4 border border-border bg-secondary/30 px-4 py-8 cursor-default transition-all duration-300 hover:border-accent hover:bg-accent/10 hover:shadow-[0_0_24px_rgba(var(--accent-rgb),0.15)]"
+                >
                   <motion.div
-                    key={service.title}
-                    data-ocid={`services.card.${ocidIndex}`}
-                    initial={{ opacity: 0, y: 16, scale: 0.92 }}
-                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
                     viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.4, delay: idx * 0.09 }}
-                    whileHover={{ y: -3, scale: 1.02 }}
-                    className="flex items-center gap-2 border border-border px-4 py-2 hover:border-accent hover:bg-secondary transition-colors duration-200 group cursor-default"
+                    transition={{ duration: 0.35, delay: idx * 0.1 + 0.15 }}
+                    className="flex items-center justify-center w-10 h-10 border border-border group-hover:border-accent transition-colors duration-300"
                   >
-                    <motion.span
-                      initial={{ rotate: -10, opacity: 0 }}
-                      whileInView={{ rotate: 0, opacity: 1 }}
-                      viewport={{ once: true, margin: "-60px" }}
-                      transition={{ duration: 0.35, delay: idx * 0.09 + 0.15 }}
-                    >
-                      <Icon className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
-                    </motion.span>
-                    <span className="text-sm font-light tracking-wide whitespace-nowrap">
-                      {service.title}
-                    </span>
+                    <Icon className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-colors duration-300" />
                   </motion.div>
-                );
-              })}
-            </div>
+                  <span className="text-sm font-light tracking-wide text-center leading-snug group-hover:text-foreground transition-colors duration-300">
+                    {service.title}
+                  </span>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -408,25 +404,6 @@ export default function HomePage() {
                   </p>
                 )}
               </motion.div>
-
-              {about?.contactEmail && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                >
-                  <a
-                    href={`mailto:${about.contactEmail}`}
-                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-                  >
-                    <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
-                    <span className="border-b border-border group-hover:border-accent transition-colors">
-                      {about.contactEmail}
-                    </span>
-                  </a>
-                </motion.div>
-              )}
             </motion.div>
           </div>
         </div>
@@ -454,27 +431,12 @@ export default function HomePage() {
                 Share your vision and we&#39;ll craft something extraordinary.
               </p>
               <div className="flex flex-col gap-3">
-                {about?.contactEmail && (
-                  <motion.a
-                    href={`mailto:${about.contactEmail}`}
-                    initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, margin: "-60px" }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                    className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-                  >
-                    <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
-                    <span className="border-b border-border group-hover:border-accent transition-colors">
-                      {about.contactEmail}
-                    </span>
-                  </motion.a>
-                )}
                 <motion.a
                   href="tel:+971558336172"
                   initial={{ opacity: 0, x: -16 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
+                  transition={{ duration: 0.4, delay: 0.1 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
@@ -487,7 +449,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, x: -16 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
@@ -502,7 +464,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, x: -16 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
+                  transition={{ duration: 0.4, delay: 0.3 }}
                   className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
                   <svg
