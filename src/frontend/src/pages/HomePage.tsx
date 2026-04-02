@@ -41,39 +41,6 @@ const SERVICES = [
   { icon: PlayCircle, title: "Walkthrough Animation" },
 ];
 
-// Pre-computed letter keys for "Get In Touch" (avoids array-index-as-key lint rule)
-const GET_IN_TOUCH_CHARS = Array.from("Get In Touch").map((ch, i) => ({
-  key: `git-char-${i}`,
-  ch,
-}));
-
-// ---------- animation variant helpers ----------
-const wordContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-const wordItem = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: "easeOut" as const },
-  },
-};
-
-const letterContainer = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.04 } },
-};
-const letterItem = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: "easeOut" as const },
-  },
-};
-
 const contactLinkHover = {
   rest: {},
   hover: {},
@@ -119,7 +86,6 @@ function FloatingField({
   delay?: number;
 }) {
   const [focused, setFocused] = useState(false);
-  const floated = focused || value.length > 0;
 
   return (
     <motion.div
@@ -127,23 +93,14 @@ function FloatingField({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay }}
-      className="relative pt-5"
+      className="flex flex-col gap-1"
     >
-      <motion.label
+      <label
         htmlFor={id}
-        animate={{
-          y: floated ? 0 : 20,
-          scale: floated ? 0.78 : 1,
-          color: focused
-            ? "hsl(var(--accent))"
-            : "hsl(var(--muted-foreground))",
-        }}
-        transition={{ duration: 0.22, ease: "easeOut" }}
-        style={{ originX: 0 }}
-        className="absolute top-0 left-0 text-xs tracking-widest uppercase pointer-events-none"
+        className="text-xs tracking-widest uppercase text-muted-foreground"
       >
         {label}
-      </motion.label>
+      </label>
 
       {multiline ? (
         <Textarea
@@ -167,7 +124,7 @@ function FloatingField({
           required={required}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className="w-full bg-transparent border-0 border-b border-border px-0 py-2 text-sm text-foreground placeholder-transparent focus:outline-none focus:border-transparent transition-colors"
+          className="w-full bg-transparent border-0 border-b border-border px-0 py-2 text-sm text-foreground focus:outline-none transition-colors"
         />
       )}
 
@@ -177,7 +134,7 @@ function FloatingField({
         initial={{ scaleX: 0 }}
         style={{ originX: 0 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
-        className="absolute bottom-0 left-0 h-px w-full bg-accent"
+        className="h-px w-full bg-accent -mt-px"
       />
     </motion.div>
   );
@@ -201,10 +158,6 @@ export default function HomePage() {
   // Contact section in-view for border sweep
   const contactRef = useRef<HTMLElement>(null);
   const contactInView = useInView(contactRef, { once: true, margin: "-80px" });
-  const headingRef = useRef<HTMLHeadingElement>(null);
-  const headingInView = useInView(headingRef, { once: true, margin: "-60px" });
-  const labelRef = useRef<HTMLParagraphElement>(null);
-  const labelInView = useInView(labelRef, { once: true, margin: "-60px" });
 
   const filteredProjects =
     activeCategory === "All"
@@ -576,44 +529,33 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
             {/* ── Left panel ── */}
             <div className="flex flex-col justify-center">
-              {/* "Get In Touch" label — letter by letter */}
+              {/* "Get In Touch" label */}
               <motion.p
-                ref={labelRef}
-                variants={letterContainer}
-                initial="hidden"
-                animate={labelInView ? "visible" : "hidden"}
-                className="flex overflow-hidden text-xs tracking-widest uppercase text-accent mb-6"
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.4 }}
+                className="text-xs tracking-widest uppercase text-accent mb-6"
               >
-                {GET_IN_TOUCH_CHARS.map(({ key, ch }) => (
-                  <motion.span key={key} variants={letterItem}>
-                    {ch === " " ? "\u00a0" : ch}
-                  </motion.span>
-                ))}
+                Get In Touch
               </motion.p>
 
-              {/* Heading — word by word */}
+              {/* Heading */}
               <motion.h2
-                ref={headingRef}
-                variants={wordContainer}
-                initial="hidden"
-                animate={headingInView ? "visible" : "hidden"}
-                className="flex flex-wrap gap-x-3 font-display text-4xl md:text-5xl font-light mb-6 leading-tight overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="font-display text-4xl md:text-5xl font-light mb-6 leading-tight"
               >
-                {["Let's", "Create"].map((word) => (
-                  <motion.span key={word} variants={wordItem}>
-                    {word}
-                  </motion.span>
-                ))}
-                <motion.span variants={wordItem} className="text-accent">
-                  Together
-                </motion.span>
+                Let&#39;s Create <span className="text-accent">Together</span>
               </motion.h2>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.55, delay: 0.35 }}
+                transition={{ duration: 0.55, delay: 0.2 }}
                 className="text-muted-foreground leading-relaxed mb-8"
               >
                 Available for new projects, collaborations, and consultations.
