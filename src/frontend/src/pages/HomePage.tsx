@@ -1,13 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ArrowDown,
   Box,
-  CheckCircle2,
   Cpu,
   Layers,
   Loader2,
@@ -17,8 +14,8 @@ import {
   PlayCircle,
   XCircle,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion, useInView } from "motion/react";
+import { useRef, useState } from "react";
 import type { Project } from "../backend";
 import ProjectCard from "../components/ProjectCard";
 import ProjectDetailModal from "../components/ProjectDetailModal";
@@ -44,6 +41,148 @@ const SERVICES = [
   { icon: PlayCircle, title: "Walkthrough Animation" },
 ];
 
+// Pre-computed letter keys for "Get In Touch" (avoids array-index-as-key lint rule)
+const GET_IN_TOUCH_CHARS = Array.from("Get In Touch").map((ch, i) => ({
+  key: `git-char-${i}`,
+  ch,
+}));
+
+// ---------- animation variant helpers ----------
+const wordContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+};
+const wordItem = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: "easeOut" as const },
+  },
+};
+
+const letterContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04 } },
+};
+const letterItem = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: "easeOut" as const },
+  },
+};
+
+const contactLinkHover = {
+  rest: {},
+  hover: {},
+};
+const iconNudge = {
+  rest: { x: 0 },
+  hover: {
+    x: 6,
+    transition: { type: "spring" as const, stiffness: 400, damping: 20 },
+  },
+};
+const underlineDraw = {
+  rest: { scaleX: 0, originX: 0 },
+  hover: {
+    scaleX: 1,
+    originX: 0,
+    transition: { duration: 0.3, ease: "easeOut" as const },
+  },
+};
+
+// Floating label field component
+function FloatingField({
+  id,
+  label,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+  multiline = false,
+  rows = 5,
+  ocid,
+  delay = 0,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  required?: boolean;
+  multiline?: boolean;
+  rows?: number;
+  ocid?: string;
+  delay?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+  const floated = focused || value.length > 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay }}
+      className="relative pt-5"
+    >
+      <motion.label
+        htmlFor={id}
+        animate={{
+          y: floated ? 0 : 20,
+          scale: floated ? 0.78 : 1,
+          color: focused
+            ? "hsl(var(--accent))"
+            : "hsl(var(--muted-foreground))",
+        }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        style={{ originX: 0 }}
+        className="absolute top-0 left-0 text-xs tracking-widest uppercase pointer-events-none"
+      >
+        {label}
+      </motion.label>
+
+      {multiline ? (
+        <Textarea
+          id={id}
+          data-ocid={ocid}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required={required}
+          rows={rows}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 resize-none focus-visible:ring-0 focus-visible:border-transparent transition-colors"
+        />
+      ) : (
+        <input
+          id={id}
+          data-ocid={ocid}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required={required}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          className="w-full bg-transparent border-0 border-b border-border px-0 py-2 text-sm text-foreground placeholder-transparent focus:outline-none focus:border-transparent transition-colors"
+        />
+      )}
+
+      {/* Animated accent line */}
+      <motion.div
+        animate={{ scaleX: focused ? 1 : 0 }}
+        initial={{ scaleX: 0 }}
+        style={{ originX: 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className="absolute bottom-0 left-0 h-px w-full bg-accent"
+      />
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -58,6 +197,14 @@ export default function HomePage() {
   const { data: projects, isLoading: projectsLoading } = useAllProjects();
   const { data: about, isLoading: aboutLoading } = useAboutContent();
   const submitContact = useSubmitContactMessage();
+
+  // Contact section in-view for border sweep
+  const contactRef = useRef<HTMLElement>(null);
+  const contactInView = useInView(contactRef, { once: true, margin: "-80px" });
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const headingInView = useInView(headingRef, { once: true, margin: "-60px" });
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const labelInView = useInView(labelRef, { once: true, margin: "-60px" });
 
   const filteredProjects =
     activeCategory === "All"
@@ -410,94 +557,165 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Contact */}
-      <section id="contact" className="py-24 border-t border-border">
+      {/* ─────────────── Contact ─────────────── */}
+      <section
+        ref={contactRef}
+        id="contact"
+        className="relative py-24 border-t border-border overflow-hidden"
+      >
+        {/* Animated sweep line on top border */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: contactInView ? 1 : 0 }}
+          transition={{ duration: 1.1, ease: "easeOut" }}
+          style={{ originX: 0 }}
+          className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-accent via-accent/60 to-transparent"
+        />
+
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.7 }}
-              className="flex flex-col justify-center"
-            >
-              <p className="text-xs tracking-widest uppercase text-accent mb-6">
-                Get In Touch
-              </p>
-              <h2 className="font-display text-4xl md:text-5xl font-light mb-6 leading-tight">
-                Let&#39;s Create <span className="text-accent">Together</span>
-              </h2>
-              <p className="text-muted-foreground leading-relaxed mb-8">
+            {/* ── Left panel ── */}
+            <div className="flex flex-col justify-center">
+              {/* "Get In Touch" label — letter by letter */}
+              <motion.p
+                ref={labelRef}
+                variants={letterContainer}
+                initial="hidden"
+                animate={labelInView ? "visible" : "hidden"}
+                className="flex overflow-hidden text-xs tracking-widest uppercase text-accent mb-6"
+              >
+                {GET_IN_TOUCH_CHARS.map(({ key, ch }) => (
+                  <motion.span key={key} variants={letterItem}>
+                    {ch === " " ? "\u00a0" : ch}
+                  </motion.span>
+                ))}
+              </motion.p>
+
+              {/* Heading — word by word */}
+              <motion.h2
+                ref={headingRef}
+                variants={wordContainer}
+                initial="hidden"
+                animate={headingInView ? "visible" : "hidden"}
+                className="flex flex-wrap gap-x-3 font-display text-4xl md:text-5xl font-light mb-6 leading-tight overflow-hidden"
+              >
+                {["Let's", "Create"].map((word) => (
+                  <motion.span key={word} variants={wordItem}>
+                    {word}
+                  </motion.span>
+                ))}
+                <motion.span variants={wordItem} className="text-accent">
+                  Together
+                </motion.span>
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.55, delay: 0.35 }}
+                className="text-muted-foreground leading-relaxed mb-8"
+              >
                 Available for new projects, collaborations, and consultations.
                 Share your vision and we&#39;ll craft something extraordinary.
-              </p>
-              <div className="flex flex-col gap-3">
-                <motion.a
-                  href="tel:+971558336172"
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.1 }}
-                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-                >
-                  <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
-                  <span className="border-b border-border group-hover:border-accent transition-colors">
-                    +971 55 833 6172
-                  </span>
-                </motion.a>
-                <motion.a
-                  href="tel:+918296541957"
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
-                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-                >
-                  <Phone className="h-4 w-4 group-hover:text-accent transition-colors" />
-                  <span className="border-b border-border group-hover:border-accent transition-colors">
-                    +91 82965 41957
-                  </span>
-                </motion.a>
-                <motion.a
-                  href="mailto:landcube0@gmail.com"
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
-                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-                >
-                  <Mail className="h-4 w-4 group-hover:text-accent transition-colors" />
-                  <span className="border-b border-border group-hover:border-accent transition-colors">
-                    landcube0@gmail.com
-                  </span>
-                </motion.a>
+              </motion.p>
+
+              {/* Contact links */}
+              <div className="flex flex-col gap-4">
+                {[
+                  {
+                    href: "tel:+971558336172",
+                    icon: Phone,
+                    label: "+971 55 833 6172",
+                    delay: 0.1,
+                    hoverColor: "text-foreground",
+                  },
+                  {
+                    href: "tel:+918296541957",
+                    icon: Phone,
+                    label: "+91 82965 41957",
+                    delay: 0.2,
+                    hoverColor: "text-foreground",
+                  },
+                  {
+                    href: "mailto:landcube0@gmail.com",
+                    icon: Mail,
+                    label: "landcube0@gmail.com",
+                    delay: 0.3,
+                    hoverColor: "text-foreground",
+                  },
+                ].map(({ href, icon: Icon, label, delay }) => (
+                  <motion.a
+                    key={href}
+                    href={href}
+                    initial="rest"
+                    whileHover="hover"
+                    animate="rest"
+                    variants={contactLinkHover}
+                    custom={delay}
+                    className="inline-flex items-center gap-3 text-sm text-muted-foreground w-fit group"
+                  >
+                    <motion.span
+                      variants={iconNudge}
+                      className="text-muted-foreground group-hover:text-accent transition-colors"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </motion.span>
+                    <span className="relative">
+                      {label}
+                      <motion.span
+                        variants={underlineDraw}
+                        className="absolute bottom-[-2px] left-0 h-px w-full bg-accent"
+                      />
+                    </span>
+                  </motion.a>
+                ))}
+
+                {/* WhatsApp link */}
                 <motion.a
                   href="https://wa.me/971558336172"
                   target="_blank"
                   rel="noopener noreferrer"
-                  initial={{ opacity: 0, x: -16 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
-                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+                  initial="rest"
+                  whileHover="hover"
+                  animate="rest"
+                  variants={contactLinkHover}
+                  className="inline-flex items-center gap-3 text-sm text-muted-foreground w-fit group"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 32 32"
-                    fill="currentColor"
-                    className="h-4 w-4 group-hover:text-[#25D366] transition-colors"
+                  <motion.span
+                    variants={iconNudge}
                     style={{ color: "#25D366" }}
                   >
-                    <title>WhatsApp</title>
-                    <path d="M16 2C8.268 2 2 8.268 2 16c0 2.522.658 4.89 1.806 6.938L2 30l7.294-1.772A13.93 13.93 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.6a11.55 11.55 0 0 1-5.892-1.608l-.422-.252-4.33 1.052 1.082-4.21-.276-.434A11.558 11.558 0 0 1 4.4 16C4.4 9.59 9.59 4.4 16 4.4S27.6 9.59 27.6 16 22.41 27.6 16 27.6zm6.344-8.664c-.348-.174-2.058-1.014-2.376-1.13-.318-.116-.55-.174-.782.174-.232.348-.898 1.13-1.102 1.362-.202.232-.404.26-.752.086-.348-.174-1.47-.542-2.8-1.726-1.034-.922-1.732-2.06-1.936-2.408-.202-.348-.022-.536.152-.708.156-.156.348-.406.522-.608.174-.202.232-.348.348-.58.116-.232.058-.436-.028-.608-.088-.174-.782-1.888-1.072-2.586-.282-.678-.57-.586-.782-.596l-.666-.012c-.232 0-.608.086-.926.434-.318.348-1.216 1.188-1.216 2.896s1.244 3.358 1.418 3.59c.174.232 2.45 3.74 5.938 5.244.83.358 1.478.572 1.982.732.832.264 1.59.226 2.188.138.668-.1 2.058-.842 2.348-1.656.29-.814.29-1.512.204-1.656-.086-.144-.318-.232-.666-.406z" />
-                  </svg>
-                  <span className="border-b border-border group-hover:border-[#25D366] transition-colors">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 32 32"
+                      fill="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <title>WhatsApp</title>
+                      <path d="M16 2C8.268 2 2 8.268 2 16c0 2.522.658 4.89 1.806 6.938L2 30l7.294-1.772A13.93 13.93 0 0 0 16 30c7.732 0 14-6.268 14-14S23.732 2 16 2zm0 25.6a11.55 11.55 0 0 1-5.892-1.608l-.422-.252-4.33 1.052 1.082-4.21-.276-.434A11.558 11.558 0 0 1 4.4 16C4.4 9.59 9.59 4.4 16 4.4S27.6 9.59 27.6 16 22.41 27.6 16 27.6zm6.344-8.664c-.348-.174-2.058-1.014-2.376-1.13-.318-.116-.55-.174-.782.174-.232.348-.898 1.13-1.102 1.362-.202.232-.404.26-.752.086-.348-.174-1.47-.542-2.8-1.726-1.034-.922-1.732-2.06-1.936-2.408-.202-.348-.022-.536.152-.708.156-.156.348-.406.522-.608.174-.202.232-.348.348-.58.116-.232.058-.436-.028-.608-.088-.174-.782-1.888-1.072-2.586-.282-.678-.57-.586-.782-.596l-.666-.012c-.232 0-.608.086-.926.434-.318.348-1.216 1.188-1.216 2.896s1.244 3.358 1.418 3.59c.174.232 2.45 3.74 5.938 5.244.83.358 1.478.572 1.982.732.832.264 1.59.226 2.188.138.668-.1 2.058-.842 2.348-1.656.29-.814.29-1.512.204-1.656-.086-.144-.318-.232-.666-.406z" />
+                    </svg>
+                  </motion.span>
+                  <span className="relative">
                     Chat on WhatsApp
+                    <motion.span
+                      variants={{
+                        rest: { scaleX: 0, originX: 0 },
+                        hover: {
+                          scaleX: 1,
+                          originX: 0,
+                          transition: { duration: 0.3, ease: "easeOut" },
+                        },
+                      }}
+                      className="absolute bottom-[-2px] left-0 h-px w-full"
+                      style={{ backgroundColor: "#25D366" }}
+                    />
                   </span>
                 </motion.a>
               </div>
-            </motion.div>
+            </div>
 
+            {/* ── Right panel — form / success ── */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -509,28 +727,80 @@ export default function HomePage() {
                   <motion.div
                     key="success"
                     data-ocid="contact.success_state"
-                    initial={{ opacity: 0, scale: 0.97 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex flex-col items-center justify-center text-center py-16 px-8 border border-border h-full min-h-[320px] gap-5"
+                    transition={{ duration: 0.4 }}
+                    className="flex flex-col items-center justify-center text-center py-16 px-8 border border-border h-full min-h-[320px] gap-6"
                   >
-                    <CheckCircle2 className="h-12 w-12 text-accent" />
-                    <div>
+                    {/* SVG draw-in check circle */}
+                    <motion.svg
+                      aria-label="Message sent successfully"
+                      role="img"
+                      viewBox="0 0 52 52"
+                      className="w-16 h-16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <motion.circle
+                        cx="26"
+                        cy="26"
+                        r="24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-accent"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        transition={{ duration: 0.7, ease: "easeOut" }}
+                      />
+                      <motion.path
+                        d="M14 26l8 8 16-16"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-accent"
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        transition={{
+                          duration: 0.5,
+                          delay: 0.6,
+                          ease: "easeOut",
+                        }}
+                      />
+                    </motion.svg>
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.9, duration: 0.4 }}
+                    >
                       <p className="font-display text-2xl font-light mb-2">
                         Message sent!
                       </p>
-                      <p className="text-muted-foreground text-sm">
-                        We&#39;ll be in touch soon.
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-none text-xs tracking-widest uppercase mt-2"
-                      onClick={() => setSubmitted(false)}
+                    </motion.div>
+                    <motion.p
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.05, duration: 0.4 }}
+                      className="text-muted-foreground text-sm"
                     >
-                      Send another
-                    </Button>
+                      We&#39;ll be in touch soon.
+                    </motion.p>
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 1.2, duration: 0.4 }}
+                    >
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-none text-xs tracking-widest uppercase mt-2"
+                        onClick={() => setSubmitted(false)}
+                      >
+                        Send another
+                      </Button>
+                    </motion.div>
                   </motion.div>
                 ) : (
                   <motion.form
@@ -539,105 +809,47 @@ export default function HomePage() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onSubmit={handleContactSubmit}
-                    className="space-y-6"
+                    className="space-y-8"
                   >
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-60px" }}
-                      transition={{ duration: 0.5, delay: 0.1 }}
-                      className="space-y-2"
-                    >
-                      <Label
-                        htmlFor="contact-name"
-                        className="text-xs tracking-widest uppercase text-muted-foreground"
-                      >
-                        Name
-                      </Label>
-                      <Input
-                        id="contact-name"
-                        data-ocid="contact.input"
-                        value={contactName}
-                        onChange={(e) => setContactName(e.target.value)}
-                        placeholder="Your full name"
-                        required
-                        className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-60px" }}
-                      transition={{ duration: 0.5, delay: 0.18 }}
-                      className="space-y-2"
-                    >
-                      <Label
-                        htmlFor="contact-phone"
-                        className="text-xs tracking-widest uppercase text-muted-foreground"
-                      >
-                        Phone Number
-                      </Label>
-                      <Input
-                        id="contact-phone"
-                        data-ocid="contact.phone.input"
-                        type="tel"
-                        value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
-                        placeholder="Your phone number"
-                        className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-60px" }}
-                      transition={{ duration: 0.5, delay: 0.26 }}
-                      className="space-y-2"
-                    >
-                      <Label
-                        htmlFor="contact-email"
-                        className="text-xs tracking-widest uppercase text-muted-foreground"
-                      >
-                        Email
-                      </Label>
-                      <Input
-                        id="contact-email"
-                        data-ocid="contact.email.input"
-                        type="email"
-                        value={contactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        required
-                        className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 focus-visible:ring-0 focus-visible:border-accent transition-colors"
-                      />
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 16 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-60px" }}
-                      transition={{ duration: 0.5, delay: 0.34 }}
-                      className="space-y-2"
-                    >
-                      <Label
-                        htmlFor="contact-message"
-                        className="text-xs tracking-widest uppercase text-muted-foreground"
-                      >
-                        Message
-                      </Label>
-                      <Textarea
-                        id="contact-message"
-                        data-ocid="contact.message.textarea"
-                        value={contactMessage}
-                        onChange={(e) => setContactMessage(e.target.value)}
-                        placeholder="Tell us about your project..."
-                        required
-                        rows={5}
-                        className="rounded-none border-x-0 border-t-0 border-b border-border bg-transparent px-0 resize-none focus-visible:ring-0 focus-visible:border-accent transition-colors"
-                      />
-                    </motion.div>
+                    <FloatingField
+                      id="contact-name"
+                      label="Name"
+                      value={contactName}
+                      onChange={setContactName}
+                      required
+                      ocid="contact.input"
+                      delay={0.1}
+                    />
+                    <FloatingField
+                      id="contact-phone"
+                      label="Phone Number"
+                      value={contactPhone}
+                      onChange={setContactPhone}
+                      type="tel"
+                      ocid="contact.phone.input"
+                      delay={0.18}
+                    />
+                    <FloatingField
+                      id="contact-email"
+                      label="Email"
+                      value={contactEmail}
+                      onChange={setContactEmail}
+                      type="email"
+                      required
+                      ocid="contact.email.input"
+                      delay={0.26}
+                    />
+                    <FloatingField
+                      id="contact-message"
+                      label="Message"
+                      value={contactMessage}
+                      onChange={setContactMessage}
+                      required
+                      multiline
+                      rows={5}
+                      ocid="contact.message.textarea"
+                      delay={0.34}
+                    />
 
                     {submitError && (
                       <motion.div
@@ -658,21 +870,48 @@ export default function HomePage() {
                       viewport={{ once: true, margin: "-60px" }}
                       transition={{ duration: 0.5, delay: 0.42 }}
                     >
-                      <Button
+                      {/* Shimmer submit button */}
+                      <motion.button
                         data-ocid="contact.submit_button"
                         type="submit"
                         disabled={submitContact.isPending}
-                        className="w-full rounded-none text-xs tracking-widest uppercase h-12 bg-accent text-accent-foreground hover:bg-accent/90"
+                        whileHover={
+                          submitContact.isPending ? {} : { scale: 1.02 }
+                        }
+                        whileTap={
+                          submitContact.isPending ? {} : { scale: 0.98 }
+                        }
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25,
+                        }}
+                        className="relative w-full h-12 overflow-hidden bg-accent text-accent-foreground text-xs tracking-widest uppercase font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                       >
+                        {/* Shimmer sweep overlay */}
+                        {!submitContact.isPending && (
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-0 pointer-events-none"
+                            style={{
+                              background:
+                                "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)",
+                              backgroundSize: "200% 100%",
+                            }}
+                            initial={{ backgroundPositionX: "200%" }}
+                            whileHover={{ backgroundPositionX: "-200%" }}
+                            transition={{ duration: 0.65, ease: "easeInOut" }}
+                          />
+                        )}
                         {submitContact.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <span className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
                             Sending...
-                          </>
+                          </span>
                         ) : (
                           "Send Message"
                         )}
-                      </Button>
+                      </motion.button>
                     </motion.div>
                   </motion.form>
                 )}
